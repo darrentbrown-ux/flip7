@@ -711,15 +711,17 @@ function getHandRect(player) {
 }
 
 /**
- * Get the bounding rect of a player's area element.
+ * Get the bounding rect of a player's hand area (not the whole panel).
+ * Used as source/destination for player-to-player card animations.
  */
 function getPlayerAreaRect(player) {
+  let hand;
   if (player.type === 'human') {
-    const el = document.getElementById('zone-human');
-    return el ? el.getBoundingClientRect() : null;
+    hand = document.querySelector('#zone-human .hand');
+  } else {
+    hand = document.querySelector(`[data-player-id="${player.id}"] .hand`);
   }
-  const el = document.querySelector(`[data-player-id="${player.id}"]`);
-  return el ? el.getBoundingClientRect() : null;
+  return hand ? hand.getBoundingClientRect() : null;
 }
 
 /**
@@ -730,17 +732,23 @@ function getPlayerAreaRect(player) {
  * fromRect (optional): override source rect; defaults to deck.
  */
 function animateDeal(imgKey, toRect, cb, fromRect) {
-  if (!fromRect) fromRect = getDeckRect();
+  const deckRect = getDeckRect();
+  if (!fromRect) fromRect = deckRect;
   if (!fromRect || !toRect) { cb(); return; }
 
-  const w = fromRect.width;
-  const h = fromRect.height;
+  // Always use deck card dimensions for the flying card size
+  const w = deckRect ? deckRect.width  : fromRect.width;
+  const h = deckRect ? deckRect.height : fromRect.height;
+
+  // Source position: center of fromRect
+  const srcLeft = fromRect.left + fromRect.width  / 2 - w / 2;
+  const srcTop  = fromRect.top  + fromRect.height / 2 - h / 2;
 
   const fly = document.createElement('div');
   fly.className = 'flying-card';
   fly.style.cssText = `
-    left: ${fromRect.left}px;
-    top: ${fromRect.top}px;
+    left: ${srcLeft}px;
+    top: ${srcTop}px;
     width: ${w}px;
     height: ${h}px;
   `;
@@ -749,8 +757,8 @@ function animateDeal(imgKey, toRect, cb, fromRect) {
   fly.appendChild(img);
 
   // Destination: center of hand rect
-  const destX = (toRect.left + toRect.width / 2) - (fromRect.left + w / 2);
-  const destY = (toRect.top  + toRect.height / 2) - (fromRect.top  + h / 2);
+  const destX = (toRect.left + toRect.width / 2) - (srcLeft + w / 2);
+  const destY = (toRect.top  + toRect.height / 2) - (srcTop  + h / 2);
 
   // Arc midpoint: halfway + slight upward curve
   const midX = destX * 0.5;
