@@ -381,8 +381,30 @@ body {
   100% { transform: translate(var(--fly-x), var(--fly-y)) scale(0.85); opacity: 0; }
 }
 
+/* Used Second Chance card — red NO overlay */
+.card .sc-used-overlay {
+  position: absolute; inset: 0;
+  display: flex; align-items: center; justify-content: center;
+  background: rgba(192,57,43,0.55);
+  border-radius: inherit;
+  font-size: 2em;
+  pointer-events: none;
+}
+
+/* Freeze/FlipThree badges shown below a player's hand */
+.action-badge-row {
+  display: flex; gap: 4px; justify-content: center; flex-wrap: wrap;
+  margin-top: 4px; flex-shrink: 0;
+}
+.action-badge {
+  font-size: clamp(0.55rem, 0.7vw, 0.72rem);
+  padding: 2px 7px; border-radius: 4px; font-weight: 700;
+  letter-spacing: 0.5px;
+}
+.action-badge.freeze-badge { background: var(--blue); color: white; }
+.action-badge.flipthree-badge { background: var(--purple); color: white; }
+
 /* ===== SECOND CHANCE MODAL ===== */
-.sc-modal h3 { color: var(--purple); margin-bottom: 0.5rem; }
 .btn-use-sc { background: linear-gradient(135deg, var(--purple), #6c3483); color: white; }
 .btn-skip-sc { background: transparent; border: 1px solid rgba(255,255,255,0.3); color: var(--muted); }
 </style>
@@ -518,9 +540,9 @@ const DECK_CONFIG = [
 
 const WINNING_SCORE  = 200;
 const FLIP7_BONUS    = 15;
-const STAY_BONUS     = 4;
+// No stay bonus in official rules
 const PLAYER_COLORS  = ['#e74c3c','#3498db','#2ecc71','#9b59b6'];
-const PLAYER_NAMES   = ['Player 1','Player 2','Player 3','Player 4'];
+const PLAYER_NAMES   = ['Darren','Player 2','Player 3','Player 4'];
 
 let _cardId = 0;
 const makeCard = cfg => ({
@@ -552,7 +574,8 @@ let G = null;
 
 function createPlayer(id, name, type, color) {
   return { id, name, type, color, totalScore: 0,
-    hand: [], bonusCards: [], hasStayed: false, isBusted: false, isFrozen: false };
+    hand: [], bonusCards: [], receivedActions: [],
+    hasStayed: false, isBusted: false, isFrozen: false };
 }
 
 function startGame(playerDefs) {
@@ -577,7 +600,7 @@ function startGame(playerDefs) {
 
 function startRound() {
   for (const p of G.players) {
-    p.hand = []; p.bonusCards = [];
+    p.hand = []; p.bonusCards = []; p.receivedActions = [];
     p.hasStayed = false; p.isBusted = false; p.isFrozen = false;
   }
   G.phase = 'playing';
@@ -632,8 +655,7 @@ function calcRoundScore(player) {
   if (player.bonusCards.some(c => c.type === 'multiplier')) sum *= 2;
   const bonus = player.bonusCards.filter(c => c.type === 'bonus').reduce((s, c) => s + c.points, 0);
   const flip7 = G.flip7PlayerId === player.id ? FLIP7_BONUS : 0;
-  const stay  = player.hasStayed ? STAY_BONUS : 0;
-  return sum + bonus + flip7 + stay;
+  return sum + bonus + flip7;
 }
 
 function bustProb(player) {
@@ -787,7 +809,7 @@ function _processDrawnCard(p, card, isHuman) {
     const unique = new Set(vals);
     if (unique.size < vals.length) {
       // Would bust
-      const scIdx = p.bonusCards.findIndex(c => c.action === 'secondChance');
+      const scIdx = p.bonusCards.findIndex(c => c.action === 'secondChance' && !c.used);
       if (scIdx !== -1) {
         if (p.type === 'human') {
           G.scPending = { card, playerIdx: p.id };
@@ -834,7 +856,7 @@ function handleActionCard(card, actor) {
   const action = card.action;
 
   if (action === 'secondChance') {
-    const alreadyHas = actor.bonusCards.some(c => c.action === 'secondChance');
+    const alreadyHas = actor.bonusCards.some(c => c.action === 'secondChance' && !c.used);
     if (!alreadyHas) {
       actor.bonusCards.push(card);
       setLog(`${actor.name} received a Second Chance card!`);
@@ -843,7 +865,7 @@ function handleActionCard(card, actor) {
     } else {
       const recipients = G.players.filter(p =>
         p.id !== actor.id && !p.isBusted && !p.hasStayed &&
-        !p.bonusCards.some(c => c.action === 'secondChance')
+        !p.bonusCards.some(c => c.action === 'secondChance' && !c.used)
       );
       if (recipients.length === 0) {
         G.discard.push(card);
@@ -876,6 +898,7 @@ function handleActionCard(card, actor) {
       G.phase = 'waitTarget';
       showTargetModal('Freeze a player:', targets, target => {
         target.hasStayed = true; target.isFrozen = true;
+        target.receivedActions.push(card);
         setLog(`${actor.name} froze ${target.name}!`);
         G.phase = 'playing'; renderGame();
         setTimeout(() => afterActionResolved(actor), 400);
@@ -883,6 +906,7 @@ function handleActionCard(card, actor) {
     } else {
       const target = aiPickTarget(actor, 'freeze', targets);
       target.hasStayed = true; target.isFrozen = true;
+      target.receivedActions.push(card);
       setLog(`${actor.name} froze ${target.name}!`);
       renderGame();
       setTimeout(() => afterActionResolved(actor), 700);
@@ -896,6 +920,7 @@ function handleActionCard(card, actor) {
       G.phase = 'waitTarget';
       showTargetModal('Flip Three — choose a player to draw 3 cards:', targets, target => {
         setLog(`${target.name} must draw 3 cards!`);
+        target.receivedActions.push(card);
         G.phase = 'playing';
         G.forcedDraw = { targetId: target.id, remaining: 3, pendingActions: [] };
         renderGame();
@@ -904,6 +929,7 @@ function handleActionCard(card, actor) {
     } else {
       const target = aiPickTarget(actor, 'flipThree', targets);
       setLog(`${actor.name} forces ${target.name} to draw 3!`);
+      target.receivedActions.push(card);
       G.forcedDraw = { targetId: target.id, remaining: 3, pendingActions: [] };
       renderGame();
       setTimeout(() => processForcedDraw(), 600);
@@ -951,7 +977,7 @@ function processForcedDraw() {
     const vals = target.hand.map(c => c.value);
     const unique = new Set(vals);
     if (unique.size < vals.length) {
-      const scIdx = target.bonusCards.findIndex(c => c.action === 'secondChance');
+      const scIdx = target.bonusCards.findIndex(c => c.action === 'secondChance' && !c.used);
       if (scIdx !== -1) {
         if (target.type === 'human') {
           G.scPending = { card, playerIdx: target.id };
@@ -981,8 +1007,8 @@ function processForcedDraw() {
 }
 
 function useSecondChance(player, bustCard) {
-  const scIdx = player.bonusCards.findIndex(c => c.action === 'secondChance');
-  if (scIdx !== -1) G.discard.push(player.bonusCards.splice(scIdx, 1)[0]);
+  const scIdx = player.bonusCards.findIndex(c => c.action === 'secondChance' && !c.used);
+  if (scIdx !== -1) player.bonusCards[scIdx].used = true; // stays in hand, marked used
   const ci = player.hand.findIndex(c => c.id === bustCard.id);
   if (ci !== -1) G.discard.push(player.hand.splice(ci, 1)[0]);
   setLog(`${player.name} used Second Chance!`);
@@ -1065,6 +1091,9 @@ function aiDecide(player) {
   const score = calcRoundScore(player);
   const bp = bustProb(player);
   const n = nums.length;
+  // Never stay if holding a Second Chance — use it as a safety net
+  const hasSC = player.bonusCards.some(c => c.action === 'secondChance' && !c.used);
+  if (hasSC) return 'draw';
   switch (player.type) {
     case 'ai-easy':
       if (n >= 4 && Math.random() < 0.4) return 'stay';
@@ -1078,7 +1107,6 @@ function aiDecide(player) {
       return 'draw';
     case 'ai-hard':
       if (player.totalScore + score >= WINNING_SCORE) return 'stay';
-      if (player.bonusCards.some(c => c.action === 'secondChance')) return 'draw';
       if (n >= 5 && bp < 0.35) return 'draw';
       if (score >= 35) return 'stay';
       if (bp > 0.4) return 'stay';
@@ -1136,6 +1164,13 @@ function cardEl(card, sizeClass = '') {
   img.alt = String(card.value);
   img.onerror = () => { img.style.display='none'; div.textContent = card.value; };
   div.appendChild(img);
+  // Used Second Chance: red NO symbol overlay
+  if (card.action === 'secondChance' && card.used) {
+    const ov = document.createElement('div');
+    ov.className = 'sc-used-overlay';
+    ov.textContent = '🚫';
+    div.appendChild(ov);
+  }
   return div;
 }
 
@@ -1183,6 +1218,19 @@ function renderOpponent(player) {
   if ((player.isBusted || player.hasStayed) && player.hand.length === 0 && player.bonusCards.length === 0)
     hand.appendChild(backCardEl('xs'));
   area.appendChild(hand);
+
+  // Show Freeze/FlipThree cards received this round
+  if (player.receivedActions && player.receivedActions.length > 0) {
+    const badgeRow = document.createElement('div');
+    badgeRow.className = 'action-badge-row';
+    for (const c of player.receivedActions) {
+      const b = document.createElement('span');
+      b.className = `action-badge ${c.action === 'freeze' ? 'freeze-badge' : 'flipthree-badge'}`;
+      b.textContent = c.action === 'freeze' ? '❄️ FROZEN' : '🔄 FLIP 3';
+      badgeRow.appendChild(b);
+    }
+    area.appendChild(badgeRow);
+  }
 
   const info = document.createElement('div');
   info.className = 'opp-round-score';
@@ -1266,6 +1314,19 @@ function renderHuman(player) {
     area.appendChild(bonRow);
   }
 
+  // Show Freeze/FlipThree cards received this round
+  if (player.receivedActions && player.receivedActions.length > 0) {
+    const badgeRow = document.createElement('div');
+    badgeRow.className = 'action-badge-row';
+    for (const c of player.receivedActions) {
+      const b = document.createElement('span');
+      b.className = `action-badge ${c.action === 'freeze' ? 'freeze-badge' : 'flipthree-badge'}`;
+      b.textContent = c.action === 'freeze' ? '❄️ FROZEN' : '🔄 FLIP 3 (drew 3 extra)';
+      badgeRow.appendChild(b);
+    }
+    area.appendChild(badgeRow);
+  }
+
   // Score info
   // Score info — always visible
   const infoRow = document.createElement('div');
@@ -1285,7 +1346,7 @@ function renderHuman(player) {
 
   const btnStay = document.createElement('button');
   btnStay.className = 'btn-action btn-stay';
-  btnStay.textContent = '✋ Stay (+4)';
+  btnStay.textContent = '✋ Stay';
   btnStay.disabled = !canAct || numCards === 0;
   if (canAct && numCards > 0) btnStay.onclick = () => playerStay();
 
