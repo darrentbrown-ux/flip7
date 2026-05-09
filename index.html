@@ -711,13 +711,26 @@ function getHandRect(player) {
 }
 
 /**
+ * Get the bounding rect of a player's area element.
+ */
+function getPlayerAreaRect(player) {
+  if (player.type === 'human') {
+    const el = document.getElementById('zone-human');
+    return el ? el.getBoundingClientRect() : null;
+  }
+  const el = document.querySelector(`[data-player-id="${player.id}"]`);
+  return el ? el.getBoundingClientRect() : null;
+}
+
+/**
  * Animate a card flying from the deck to the target hand area.
  * imgKey: card image key (or 'back' for face-down).
  * toRect: destination getBoundingClientRect().
  * cb: called after animation completes.
+ * fromRect (optional): override source rect; defaults to deck.
  */
-function animateDeal(imgKey, toRect, cb) {
-  const fromRect = getDeckRect();
+function animateDeal(imgKey, toRect, cb, fromRect) {
+  if (!fromRect) fromRect = getDeckRect();
   if (!fromRect || !toRect) { cb(); return; }
 
   const w = fromRect.width;
@@ -891,18 +904,28 @@ function handleActionCard(card, actor) {
       } else if (actor.type === 'human') {
         G.phase = 'waitTarget';
         showTargetModal('Give Second Chance to:', recipients, target => {
-          target.bonusCards.push(card);
-          setLog(`${actor.name} gave Second Chance to ${target.name}.`);
           G.phase = 'playing';
           renderGame();
-          setTimeout(() => afterActionResolved(actor), 400);
+          const fromRect = getPlayerAreaRect(actor);
+          const toRect   = getPlayerAreaRect(target);
+          animateDeal(card.imgKey, toRect, () => {
+            target.bonusCards.push(card);
+            setLog(`${actor.name} gave Second Chance to ${target.name}.`);
+            renderGame();
+            setTimeout(() => afterActionResolved(actor), 300);
+          }, fromRect);
         });
       } else {
         const target = aiPickTarget(actor, 'giveSecondChance', recipients);
-        target.bonusCards.push(card);
         setLog(`${actor.name} gave Second Chance to ${target.name}.`);
         renderGame();
-        setTimeout(() => afterActionResolved(actor), 600);
+        const fromRect = getPlayerAreaRect(actor);
+        const toRect   = getPlayerAreaRect(target);
+        animateDeal(card.imgKey, toRect, () => {
+          target.bonusCards.push(card);
+          renderGame();
+          setTimeout(() => afterActionResolved(actor), 300);
+        }, fromRect);
       }
     }
     return;
@@ -913,19 +936,30 @@ function handleActionCard(card, actor) {
     if (actor.type === 'human') {
       G.phase = 'waitTarget';
       showTargetModal('Freeze a player:', targets, target => {
-        target.hasStayed = true; target.isFrozen = true;
-        target.receivedActions.push(card);
-        setLog(`${actor.name} froze ${target.name}!`);
-        G.phase = 'playing'; renderGame();
-        setTimeout(() => afterActionResolved(actor), 400);
+        G.phase = 'playing';
+        renderGame();
+        const fromRect = getPlayerAreaRect(actor);
+        const toRect   = getPlayerAreaRect(target);
+        animateDeal(card.imgKey, toRect, () => {
+          target.hasStayed = true; target.isFrozen = true;
+          target.receivedActions.push(card);
+          setLog(`${actor.name} froze ${target.name}!`);
+          renderGame();
+          setTimeout(() => afterActionResolved(actor), 300);
+        }, fromRect);
       });
     } else {
       const target = aiPickTarget(actor, 'freeze', targets);
-      target.hasStayed = true; target.isFrozen = true;
-      target.receivedActions.push(card);
       setLog(`${actor.name} froze ${target.name}!`);
       renderGame();
-      setTimeout(() => afterActionResolved(actor), 700);
+      const fromRect = getPlayerAreaRect(actor);
+      const toRect   = getPlayerAreaRect(target);
+      animateDeal(card.imgKey, toRect, () => {
+        target.hasStayed = true; target.isFrozen = true;
+        target.receivedActions.push(card);
+        renderGame();
+        setTimeout(() => afterActionResolved(actor), 300);
+      }, fromRect);
     }
     return;
   }
@@ -935,20 +969,30 @@ function handleActionCard(card, actor) {
     if (actor.type === 'human') {
       G.phase = 'waitTarget';
       showTargetModal('Flip Three — choose a player to draw 3 cards:', targets, target => {
-        setLog(`${target.name} must draw 3 cards!`);
-        target.receivedActions.push(card);
         G.phase = 'playing';
-        G.forcedDraw = { targetId: target.id, remaining: 3, pendingActions: [] };
         renderGame();
-        processForcedDraw();
+        const fromRect = getPlayerAreaRect(actor);
+        const toRect   = getPlayerAreaRect(target);
+        animateDeal(card.imgKey, toRect, () => {
+          target.receivedActions.push(card);
+          setLog(`${target.name} must draw 3 cards!`);
+          G.forcedDraw = { targetId: target.id, remaining: 3, pendingActions: [] };
+          renderGame();
+          setTimeout(() => processForcedDraw(), 300);
+        }, fromRect);
       });
     } else {
       const target = aiPickTarget(actor, 'flipThree', targets);
       setLog(`${actor.name} forces ${target.name} to draw 3!`);
-      target.receivedActions.push(card);
-      G.forcedDraw = { targetId: target.id, remaining: 3, pendingActions: [] };
       renderGame();
-      setTimeout(() => processForcedDraw(), 600);
+      const fromRect = getPlayerAreaRect(actor);
+      const toRect   = getPlayerAreaRect(target);
+      animateDeal(card.imgKey, toRect, () => {
+        target.receivedActions.push(card);
+        G.forcedDraw = { targetId: target.id, remaining: 3, pendingActions: [] };
+        renderGame();
+        setTimeout(() => processForcedDraw(), 300);
+      }, fromRect);
     }
     return;
   }
