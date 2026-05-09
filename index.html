@@ -1563,7 +1563,12 @@ document.getElementById('btn-use-sc').addEventListener('click', () => {
   G.scPending = null; G.phase = 'playing';
   renderGame();
   if (isRoundOver()) { endRound(); return; }
-  if (player.type !== 'human') setTimeout(() => nextPlayer(), 400);
+  // If a forced draw is still in progress for this player, resume it
+  if (G.forcedDraw && G.forcedDraw.targetId === player.id) {
+    setTimeout(() => processForcedDraw(), 700);
+  } else if (player.type !== 'human') {
+    setTimeout(() => nextPlayer(), 400);
+  }
 });
 
 document.getElementById('btn-skip-sc').addEventListener('click', () => {
@@ -1572,6 +1577,7 @@ document.getElementById('btn-skip-sc').addEventListener('click', () => {
   const player = G.players.find(p => p.id === G.scPending.playerIdx);
   player.isBusted = true;
   setLog(`${player.name} accepted the bust.`);
+  G.forcedDraw = null; // bust ends any forced draw
   G.scPending = null; G.phase = 'playing';
   renderGame();
   if (isRoundOver()) { endRound(); return; }
