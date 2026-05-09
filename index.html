@@ -7,7 +7,6 @@
 <style>
 :root {
   --bg: #0d2116;
-  --felt: #12371f;
   --panel: rgba(0,0,0,0.35);
   --gold: #f5c842;
   --gold2: #d4a017;
@@ -15,22 +14,26 @@
   --blue: #2980b9;
   --green: #27ae60;
   --purple: #8e44ad;
-  --teal: #16a085;
   --text: #f0ead6;
   --muted: #9bb8a0;
   --card-bg: #fffdf0;
   --card-border: #c8a951;
   --radius: 10px;
-  --card-w: 64px;
-  --card-h: 96px;
+  /* Cards scale with viewport */
+  --card-w: clamp(52px, 4.5vw, 90px);
+  --card-h: clamp(78px, 6.75vw, 135px);
+  --card-sm-w: clamp(38px, 3vw, 64px);
+  --card-sm-h: clamp(57px, 4.5vw, 96px);
+  --card-xs-w: clamp(28px, 2.2vw, 48px);
+  --card-xs-h: clamp(42px, 3.3vw, 72px);
 }
 * { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { height: 100%; overflow: hidden; }
 body {
   font-family: 'Segoe UI', system-ui, sans-serif;
   background: var(--bg);
   color: var(--text);
-  min-height: 100vh;
-  overflow: hidden;
+  font-size: clamp(12px, 1.1vw, 16px);
 }
 
 /* ===== SCREENS ===== */
@@ -45,7 +48,7 @@ body {
   background: radial-gradient(ellipse at center, #1a4030 0%, #0d2116 70%);
 }
 .logo {
-  font-size: 4rem;
+  font-size: clamp(2.5rem, 6vw, 5rem);
   font-weight: 900;
   color: var(--gold);
   text-shadow: 0 0 30px rgba(245,200,66,0.5), 3px 3px 0 var(--gold2);
@@ -57,216 +60,199 @@ body {
   background: var(--panel);
   border: 1px solid rgba(245,200,66,0.2);
   border-radius: var(--radius);
-  padding: 2rem;
-  min-width: 420px;
-  max-width: 500px;
+  padding: clamp(1.25rem, 2vw, 2rem);
+  width: clamp(340px, 35vw, 520px);
 }
-.setup-box h2 { color: var(--gold); margin-bottom: 1.5rem; text-align: center; font-size: 1.2rem; letter-spacing: 2px; text-transform: uppercase; }
+.setup-box h2 { color: var(--gold); margin-bottom: 1.5rem; text-align: center; font-size: 1.1rem; letter-spacing: 2px; text-transform: uppercase; }
 .player-count-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.5rem; }
 .player-count-row label { color: var(--muted); }
 .count-btns { display: flex; gap: 0.5rem; }
 .count-btn {
-  width: 36px; height: 36px;
-  border-radius: 50%;
-  border: 2px solid var(--gold2);
-  background: transparent;
-  color: var(--text);
-  font-size: 1.1rem;
-  cursor: pointer;
-  transition: all 0.15s;
+  width: 36px; height: 36px; border-radius: 50%;
+  border: 2px solid var(--gold2); background: transparent;
+  color: var(--text); font-size: 1.1rem; cursor: pointer; transition: all 0.15s;
 }
 .count-btn.active { background: var(--gold); color: #1a1a1a; border-color: var(--gold); font-weight: 700; }
 .players-config { display: flex; flex-direction: column; gap: 0.75rem; margin-bottom: 1.5rem; }
 .player-row {
   display: flex; align-items: center; gap: 0.75rem;
-  background: rgba(255,255,255,0.05);
-  border-radius: 8px;
-  padding: 0.6rem 0.75rem;
+  background: rgba(255,255,255,0.05); border-radius: 8px; padding: 0.6rem 0.75rem;
 }
 .player-row .pnum {
-  width: 28px; height: 28px;
-  border-radius: 50%;
+  width: 28px; height: 28px; border-radius: 50%;
   display: flex; align-items: center; justify-content: center;
-  font-weight: 700; font-size: 0.9rem;
-  flex-shrink: 0;
+  font-weight: 700; font-size: 0.9rem; flex-shrink: 0;
 }
 .player-row .pname-input {
-  flex: 1;
-  background: transparent;
-  border: none;
+  flex: 1; background: transparent; border: none;
   border-bottom: 1px solid rgba(255,255,255,0.2);
-  color: var(--text);
-  font-size: 0.95rem;
-  padding: 2px 4px;
-  min-width: 0;
+  color: var(--text); font-size: 0.95rem; padding: 2px 4px; min-width: 0;
 }
 .player-row .pname-input:focus { outline: none; border-bottom-color: var(--gold); }
 .player-row select {
-  background: rgba(0,0,0,0.4);
-  border: 1px solid rgba(255,255,255,0.15);
-  border-radius: 6px;
-  color: var(--text);
-  padding: 4px 6px;
-  font-size: 0.85rem;
-  cursor: pointer;
+  background: rgba(0,0,0,0.4); border: 1px solid rgba(255,255,255,0.15);
+  border-radius: 6px; color: var(--text); padding: 4px 6px; font-size: 0.85rem; cursor: pointer;
 }
 .btn-start {
-  width: 100%;
-  padding: 0.9rem;
-  border: none;
-  border-radius: 8px;
+  width: 100%; padding: 0.9rem; border: none; border-radius: 8px;
   background: linear-gradient(135deg, var(--gold), var(--gold2));
-  color: #1a1a1a;
-  font-size: 1.1rem;
-  font-weight: 700;
-  cursor: pointer;
-  letter-spacing: 1px;
-  transition: transform 0.1s, box-shadow 0.1s;
+  color: #1a1a1a; font-size: 1.1rem; font-weight: 700; cursor: pointer;
+  letter-spacing: 1px; transition: transform 0.1s, box-shadow 0.1s;
 }
 .btn-start:hover { transform: translateY(-1px); box-shadow: 0 4px 20px rgba(245,200,66,0.4); }
-.btn-start:active { transform: translateY(0); }
-.player-colors { display: none; }
 
 /* ===== GAME SCREEN ===== */
-#game-screen {
-  flex-direction: column;
-  height: 100vh;
-  overflow: hidden;
-}
+#game-screen { flex-direction: column; }
 .game-header {
   display: flex; align-items: center; gap: 1rem;
-  padding: 0.5rem 1rem;
-  background: rgba(0,0,0,0.4);
+  padding: 0.4rem 1rem;
+  background: rgba(0,0,0,0.5);
   border-bottom: 1px solid rgba(255,255,255,0.08);
-  flex-shrink: 0;
+  flex-shrink: 0; height: clamp(36px, 3.5vh, 52px);
 }
-.round-info { color: var(--gold); font-weight: 700; font-size: 1rem; }
+.round-info { color: var(--gold); font-weight: 700; font-size: 1rem; white-space: nowrap; }
 .game-log-header { flex: 1; font-size: 0.8rem; color: var(--muted); text-align: center; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .btn-menu {
-  padding: 0.3rem 0.8rem;
-  background: transparent;
-  border: 1px solid rgba(255,255,255,0.2);
-  border-radius: 6px;
-  color: var(--muted);
-  cursor: pointer;
-  font-size: 0.8rem;
+  padding: 0.25rem 0.75rem;
+  background: transparent; border: 1px solid rgba(255,255,255,0.2);
+  border-radius: 6px; color: var(--muted); cursor: pointer; font-size: 0.8rem; white-space: nowrap;
 }
 .btn-menu:hover { background: rgba(255,255,255,0.1); color: var(--text); }
+
+/* ===== GAME BODY: even split ===== */
 .game-body {
   flex: 1;
-  display: grid;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+.zone-opponents {
+  flex: 1;
+  display: flex;
+  align-items: stretch;
+  gap: clamp(6px, 0.75vw, 14px);
+  padding: clamp(6px, 0.75vw, 14px);
+  min-height: 0;
   overflow: hidden;
 }
-/* layouts for different player counts */
-.layout-2 { grid-template: "top" 1fr "bottom" auto / 1fr; }
-.layout-3 { grid-template: "top" 1fr "bottom" auto / 1fr; }
-.layout-4 { grid-template: "top" auto "mid" 1fr "bottom" auto / 1fr; }
+.zone-human {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  padding: clamp(6px, 0.75vw, 14px);
+  background: rgba(0,0,0,0.2);
+  border-top: 1px solid rgba(255,255,255,0.07);
+  min-height: 0;
+  overflow: hidden;
+}
 
-.zone-top { grid-area: top; display: flex; justify-content: center; align-items: flex-start; gap: 1rem; padding: 0.5rem; overflow: hidden; }
-.zone-mid { grid-area: mid; display: flex; justify-content: center; align-items: center; gap: 1rem; padding: 0.5rem; }
-.zone-bottom { grid-area: bottom; padding: 0.5rem 1rem; background: rgba(0,0,0,0.25); }
-
-/* ===== PLAYER AREAS ===== */
+/* ===== OPPONENT PLAYER AREA ===== */
 .player-area {
   background: var(--panel);
   border-radius: var(--radius);
-  padding: 0.6rem;
+  padding: clamp(6px, 0.8vw, 14px);
   border: 2px solid transparent;
   transition: border-color 0.3s, background 0.3s;
-  position: relative;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
 }
-.player-area.current-player {
-  border-color: var(--gold);
-  box-shadow: 0 0 15px rgba(245,200,66,0.3);
-}
+.player-area.opp { flex: 1; min-width: 0; }
+.player-area.current-player { border-color: var(--gold); box-shadow: 0 0 15px rgba(245,200,66,0.3); }
 .player-area.busted { background: rgba(192,57,43,0.15); border-color: rgba(192,57,43,0.4) !important; }
 .player-area.stayed { background: rgba(39,174,96,0.1); border-color: rgba(39,174,96,0.3) !important; }
 .player-area.frozen { background: rgba(41,128,185,0.1); border-color: rgba(41,128,185,0.4) !important; }
-.player-area-small { min-width: 180px; max-width: 280px; }
-.player-header { display: flex; align-items: center; gap: 0.4rem; margin-bottom: 0.4rem; }
-.player-avatar {
-  width: 22px; height: 22px; border-radius: 50%;
-  display: flex; align-items: center; justify-content: center;
-  font-size: 0.7rem; font-weight: 700; flex-shrink: 0;
+
+.player-header {
+  display: flex; align-items: center; gap: 0.4rem; margin-bottom: 0.5rem; flex-shrink: 0;
 }
-.player-name-display { font-weight: 700; font-size: 0.85rem; flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.player-total-score { color: var(--gold); font-weight: 700; font-size: 0.85rem; }
+.player-avatar {
+  width: clamp(20px, 2vw, 32px); height: clamp(20px, 2vw, 32px);
+  border-radius: 50%; display: flex; align-items: center; justify-content: center;
+  font-size: clamp(0.6rem, 1vw, 1rem); font-weight: 700; flex-shrink: 0;
+}
+.player-name-display { font-weight: 700; font-size: clamp(0.8rem, 1.1vw, 1.1rem); flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.player-total-score { color: var(--gold); font-weight: 700; font-size: clamp(0.8rem, 1.1vw, 1.1rem); }
 .status-badge {
-  font-size: 0.65rem; font-weight: 700;
-  padding: 1px 6px; border-radius: 4px;
-  text-transform: uppercase; letter-spacing: 0.5px;
+  font-size: clamp(0.55rem, 0.7vw, 0.7rem); font-weight: 700;
+  padding: 1px 6px; border-radius: 4px; text-transform: uppercase; letter-spacing: 0.5px;
 }
 .badge-busted { background: var(--red); color: white; }
 .badge-stayed { background: var(--green); color: white; }
 .badge-frozen { background: var(--blue); color: white; }
 .badge-active { background: var(--gold); color: #1a1a1a; }
 
+/* Card hand — always centered */
 .hand {
-  display: flex; flex-wrap: wrap; gap: 4px;
-  min-height: 40px;
+  display: flex; flex-wrap: wrap;
+  gap: clamp(3px, 0.4vw, 7px);
+  justify-content: center;
+  align-content: flex-start;
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.opp-round-score {
+  font-size: clamp(0.65rem, 0.85vw, 0.9rem);
+  color: var(--muted);
+  text-align: center;
+  margin-top: 4px;
+  flex-shrink: 0;
 }
 
 /* ===== CARDS ===== */
 .card {
-  width: var(--card-w);
-  height: var(--card-h);
-  border-radius: 8px;
+  width: var(--card-w); height: var(--card-h);
+  border-radius: clamp(5px, 0.6vw, 10px);
   border: 2px solid var(--card-border);
   background: var(--card-bg);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  cursor: default;
-  position: relative;
+  display: flex; align-items: center; justify-content: center;
+  cursor: default; position: relative;
   transition: transform 0.15s, box-shadow 0.15s;
-  overflow: hidden;
+  overflow: hidden; flex-shrink: 0;
+}
+.card img { width: 100%; height: 100%; object-fit: contain; }
+.card.sm  { width: var(--card-sm-w);  height: var(--card-sm-h); }
+.card.xs  { width: var(--card-xs-w);  height: var(--card-xs-h); }
+.card.bust-card { box-shadow: 0 0 10px var(--red); border-color: var(--red); animation: pulse-red 0.8s infinite alternate; }
+@keyframes pulse-red { from { box-shadow: 0 0 5px var(--red); } to { box-shadow: 0 0 20px var(--red); } }
+.card.flip7-card { animation: pulse-gold 0.8s infinite alternate; }
+@keyframes pulse-gold { from { box-shadow: 0 0 5px var(--gold); } to { box-shadow: 0 0 20px var(--gold); } }
+
+/* ===== HUMAN PLAYER AREA ===== */
+.human-area {
+  display: flex; flex-direction: column; gap: clamp(6px, 0.7vh, 12px);
+  flex: 1; min-height: 0;
+}
+.human-header {
+  display: flex; align-items: center; gap: clamp(0.4rem, 1vw, 1rem);
   flex-shrink: 0;
 }
-.card img { width: 100%; height: 100%; object-fit: contain; border-radius: 6px; }
-.card.small { --card-w: 42px; --card-h: 63px; }
-.card.tiny { --card-w: 32px; --card-h: 48px; }
-.card.bust-card { box-shadow: 0 0 10px var(--red); border-color: var(--red); animation: pulse-red 0.8s infinite alternate; }
-@keyframes pulse-red { from { box-shadow: 0 0 5px var(--red); } to { box-shadow: 0 0 18px var(--red); } }
-.card.flip7-card { animation: pulse-gold 0.8s infinite alternate; }
-@keyframes pulse-gold { from { box-shadow: 0 0 5px var(--gold); } to { box-shadow: 0 0 18px var(--gold); } }
-.card.targetable {
-  cursor: pointer;
-  animation: pulse-blue 0.8s infinite alternate;
-}
-.card.targetable:hover { transform: translateY(-4px); }
-@keyframes pulse-blue { from { box-shadow: 0 0 5px var(--blue); } to { box-shadow: 0 0 18px var(--blue); } }
-.card-drawn { animation: slide-in 0.3s ease-out; }
-@keyframes slide-in { from { transform: translateY(-20px) scale(0.9); opacity: 0; } to { transform: translateY(0) scale(1); opacity: 1; } }
+.human-name { font-size: clamp(1rem, 1.6vw, 1.5rem); font-weight: 700; }
+.human-score { color: var(--gold); font-size: clamp(1rem, 1.6vw, 1.5rem); font-weight: 700; }
+.human-status { font-size: clamp(0.8rem, 1vw, 1rem); }
 
-/* ===== MAIN PLAYER AREA (bottom) ===== */
-.main-player-area {
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
+.human-cards-row {
+  display: flex; gap: clamp(8px, 1.5vw, 24px);
+  align-items: flex-start; flex: 1; min-height: 0;
 }
-.main-player-header {
-  display: flex; align-items: center; gap: 0.75rem;
+.hand-section { display: flex; flex-direction: column; min-width: 0; }
+.hand-section label {
+  font-size: clamp(0.6rem, 0.75vw, 0.8rem); color: var(--muted);
+  text-transform: uppercase; letter-spacing: 1px; margin-bottom: 4px; flex-shrink: 0;
 }
-.main-player-name { font-size: 1.2rem; font-weight: 700; }
-.main-player-score { color: var(--gold); font-size: 1.2rem; font-weight: 700; }
-.main-player-status { font-size: 0.9rem; }
-.main-cards-row {
-  display: flex; gap: 1rem; align-items: flex-start;
-}
-.hand-section label { font-size: 0.7rem; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; display: block; margin-bottom: 4px; }
-.hand-section .hand { flex-wrap: wrap; max-width: 500px; }
+.hand-section .hand { justify-content: center; flex: 1; }
+.hand-section.grow { flex: 1; }
+
 .actions-row {
-  display: flex; gap: 0.75rem; align-items: center; flex-wrap: wrap;
-  padding: 0.5rem 0;
+  display: flex; gap: clamp(0.5rem, 1vw, 1rem); align-items: center; flex-wrap: wrap;
+  flex-shrink: 0; padding-top: clamp(4px, 0.5vh, 8px);
 }
 .btn-action {
-  padding: 0.6rem 1.5rem;
-  border: none;
-  border-radius: 8px;
-  font-size: 1rem;
-  font-weight: 700;
-  cursor: pointer;
+  padding: clamp(0.5rem, 0.7vh, 0.75rem) clamp(1rem, 2vw, 2rem);
+  border: none; border-radius: 8px;
+  font-size: clamp(0.85rem, 1.2vw, 1.1rem); font-weight: 700; cursor: pointer;
   transition: transform 0.1s, box-shadow 0.1s;
 }
 .btn-draw { background: linear-gradient(135deg, #e67e22, #d35400); color: white; }
@@ -274,80 +260,81 @@ body {
 .btn-stay { background: linear-gradient(135deg, var(--green), #1e8449); color: white; }
 .btn-stay:hover { box-shadow: 0 4px 15px rgba(39,174,96,0.5); transform: translateY(-1px); }
 .btn-action:disabled { opacity: 0.4; cursor: not-allowed; transform: none !important; box-shadow: none !important; }
-.bust-prob { font-size: 0.8rem; color: var(--muted); }
-.bust-prob span { font-weight: 700; color: #e67e22; }
-.round-score-display { font-size: 0.9rem; color: var(--muted); }
-.round-score-display strong { color: var(--text); }
 
-/* ===== DECK AREA ===== */
+.human-info-row {
+  font-size: clamp(0.75rem, 0.95vw, 1rem); color: var(--muted); flex-shrink: 0;
+  text-align: center;
+}
+.human-info-row strong { color: var(--text); }
+
+/* ===== DECK DISPLAY ===== */
 .deck-zone {
-  display: flex; flex-direction: column; align-items: center; gap: 0.25rem;
-  padding: 0 1rem;
+  display: flex; flex-direction: column; align-items: center; gap: 4px; flex-shrink: 0;
 }
 .deck-card-display {
   width: var(--card-w); height: var(--card-h);
-  border-radius: 8px;
+  border-radius: clamp(5px, 0.6vw, 10px);
   border: 2px solid var(--card-border);
-  background: #1a4a2a;
-  display: flex; flex-direction: column; align-items: center; justify-content: center;
-  cursor: default;
-  position: relative;
+  background: #1a4a2a; overflow: hidden;
 }
-.deck-card-display img { width: 100%; height: 100%; object-fit: cover; border-radius: 6px; }
-.deck-count { font-size: 0.75rem; color: var(--muted); }
+.deck-card-display img { width: 100%; height: 100%; object-fit: cover; }
+.deck-count { font-size: clamp(0.65rem, 0.8vw, 0.85rem); color: var(--muted); }
+
+/* ===== PAUSE MENU OVERLAY ===== */
+.pause-overlay {
+  position: fixed; inset: 0;
+  background: rgba(0,0,0,0.75);
+  display: none; z-index: 400;
+  align-items: center; justify-content: center;
+}
+.pause-overlay.visible { display: flex; }
+.pause-modal {
+  background: #1a3028; border: 2px solid var(--gold);
+  border-radius: var(--radius); padding: 2rem 2.5rem;
+  display: flex; flex-direction: column; gap: 0.75rem;
+  min-width: 240px; align-items: stretch; text-align: center;
+}
+.pause-modal h2 { color: var(--gold); margin-bottom: 0.5rem; font-size: 1.3rem; }
+.btn-pause-action {
+  padding: 0.7rem 1rem; border: none; border-radius: 8px;
+  font-size: 1rem; font-weight: 700; cursor: pointer;
+}
+.btn-resume { background: linear-gradient(135deg, var(--gold), var(--gold2)); color: #1a1a1a; }
+.btn-new-game-p { background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); color: var(--text); }
 
 /* ===== TARGET SELECTION ===== */
 .target-overlay {
-  position: fixed; inset: 0;
-  background: rgba(0,0,0,0.7);
-  display: none;
-  z-index: 100;
-  align-items: center; justify-content: center;
+  position: fixed; inset: 0; background: rgba(0,0,0,0.7);
+  display: none; z-index: 100; align-items: center; justify-content: center;
 }
 .target-overlay.visible { display: flex; }
 .target-modal {
-  background: #1a3028;
-  border: 2px solid var(--gold);
-  border-radius: var(--radius);
-  padding: 1.5rem;
-  min-width: 300px;
-  text-align: center;
+  background: #1a3028; border: 2px solid var(--gold);
+  border-radius: var(--radius); padding: 1.5rem;
+  min-width: 280px; text-align: center;
 }
 .target-modal h3 { color: var(--gold); margin-bottom: 1rem; }
 .target-buttons { display: flex; flex-direction: column; gap: 0.5rem; }
 .btn-target {
-  padding: 0.6rem 1rem;
-  border: 1px solid rgba(255,255,255,0.2);
-  border-radius: 8px;
-  background: rgba(255,255,255,0.05);
-  color: var(--text);
-  cursor: pointer;
-  font-size: 0.9rem;
-  transition: background 0.15s;
+  padding: 0.6rem 1rem; border: 1px solid rgba(255,255,255,0.2);
+  border-radius: 8px; background: rgba(255,255,255,0.05);
+  color: var(--text); cursor: pointer; font-size: 0.9rem; transition: background 0.15s;
 }
 .btn-target:hover { background: rgba(255,255,255,0.15); }
 
 /* ===== MODALS ===== */
 .modal-overlay {
-  position: fixed; inset: 0;
-  background: rgba(0,0,0,0.8);
-  display: none;
-  z-index: 200;
-  align-items: center; justify-content: center;
+  position: fixed; inset: 0; background: rgba(0,0,0,0.8);
+  display: none; z-index: 200; align-items: center; justify-content: center;
 }
 .modal-overlay.visible { display: flex; }
 .modal {
-  background: #1a3028;
-  border: 2px solid var(--gold);
-  border-radius: var(--radius);
-  padding: 2rem;
-  min-width: 360px;
-  max-width: 90vw;
-  max-height: 90vh;
-  overflow-y: auto;
-  text-align: center;
+  background: #1a3028; border: 2px solid var(--gold);
+  border-radius: var(--radius); padding: 2rem;
+  min-width: clamp(300px, 30vw, 480px);
+  max-width: 90vw; max-height: 90vh; overflow-y: auto; text-align: center;
 }
-.modal h2 { color: var(--gold); margin-bottom: 1rem; font-size: 1.5rem; }
+.modal h2 { color: var(--gold); margin-bottom: 1rem; font-size: 1.4rem; }
 .score-table { width: 100%; border-collapse: collapse; margin: 1rem 0; }
 .score-table th { color: var(--muted); font-size: 0.8rem; text-transform: uppercase; padding: 0.3rem; border-bottom: 1px solid rgba(255,255,255,0.1); }
 .score-table td { padding: 0.5rem; font-size: 0.95rem; }
@@ -355,48 +342,30 @@ body {
 .score-table .flip7-badge { color: var(--gold); font-size: 0.8rem; }
 .score-table .busted-row td { color: rgba(255,255,255,0.4); }
 .btn-next-round, .btn-new-game {
-  padding: 0.8rem 2rem;
-  border: none;
-  border-radius: 8px;
+  padding: 0.8rem 2rem; border: none; border-radius: 8px;
   background: linear-gradient(135deg, var(--gold), var(--gold2));
-  color: #1a1a1a;
-  font-size: 1rem;
-  font-weight: 700;
-  cursor: pointer;
-  margin-top: 0.5rem;
+  color: #1a1a1a; font-size: 1rem; font-weight: 700; cursor: pointer; margin-top: 0.5rem;
 }
-.game-over-winner { font-size: 1.2rem; margin-bottom: 1rem; }
+.game-over-winner { font-size: 1.1rem; margin-bottom: 1rem; }
 .game-over-winner strong { color: var(--gold); }
 
 /* ===== FLIP 7 ANIMATION ===== */
 .flip7-overlay {
-  position: fixed; inset: 0;
-  background: rgba(0,0,0,0.85);
-  display: none;
-  z-index: 300;
-  align-items: center; justify-content: center;
-  flex-direction: column;
-  gap: 1rem;
+  position: fixed; inset: 0; background: rgba(0,0,0,0.85);
+  display: none; z-index: 300;
+  align-items: center; justify-content: center; flex-direction: column; gap: 1rem;
 }
 .flip7-overlay.visible { display: flex; animation: fade-in 0.3s; }
 @keyframes fade-in { from { opacity: 0; } to { opacity: 1; } }
-.flip7-text { font-size: 3rem; font-weight: 900; color: var(--gold); text-shadow: 0 0 40px rgba(245,200,66,0.8); animation: bounce 0.5s ease infinite alternate; }
+.flip7-text { font-size: clamp(2rem, 5vw, 4rem); font-weight: 900; color: var(--gold); text-shadow: 0 0 40px rgba(245,200,66,0.8); animation: bounce 0.5s ease infinite alternate; }
 @keyframes bounce { from { transform: scale(1); } to { transform: scale(1.05); } }
-.flip7-sub { font-size: 1.5rem; color: white; }
-.flip7-bonus { font-size: 2rem; font-weight: 700; color: #66ff99; }
+.flip7-sub { font-size: clamp(1rem, 2vw, 1.5rem); color: white; }
+.flip7-bonus { font-size: clamp(1.3rem, 2.5vw, 2rem); font-weight: 700; color: #66ff99; }
 
 /* ===== SECOND CHANCE MODAL ===== */
 .sc-modal h3 { color: var(--purple); margin-bottom: 0.5rem; }
-.sc-card-display { margin: 0.75rem auto; }
 .btn-use-sc { background: linear-gradient(135deg, var(--purple), #6c3483); color: white; }
 .btn-skip-sc { background: transparent; border: 1px solid rgba(255,255,255,0.3); color: var(--muted); }
-
-/* Responsive */
-@media (max-width: 700px) {
-  :root { --card-w: 42px; --card-h: 63px; }
-  .setup-box { min-width: unset; width: 95vw; padding: 1.25rem; }
-  .logo { font-size: 2.5rem; }
-}
 </style>
 </head>
 <body>
@@ -425,11 +394,20 @@ body {
   <div class="game-header">
     <div class="round-info" id="round-info">Round 1</div>
     <div class="game-log-header" id="game-log"></div>
-    <button class="btn-menu" id="btn-menu">Menu</button>
+    <button class="btn-menu" id="btn-menu">⏸ Menu</button>
   </div>
   <div class="game-body" id="game-body">
-    <div class="zone-top" id="zone-top"></div>
-    <div class="zone-bottom" id="zone-bottom"></div>
+    <div class="zone-opponents" id="zone-opponents"></div>
+    <div class="zone-human" id="zone-human"></div>
+  </div>
+</div>
+
+<!-- PAUSE MENU -->
+<div class="pause-overlay" id="pause-overlay">
+  <div class="pause-modal">
+    <h2>⏸ Game Paused</h2>
+    <button class="btn-pause-action btn-resume" id="btn-resume">▶ Resume</button>
+    <button class="btn-pause-action btn-new-game-p" id="btn-new-game-pause">New Game</button>
   </div>
 </div>
 
@@ -481,93 +459,66 @@ body {
 
 <script>
 // ====================================================================
-//  FLIP 7 — STANDALONE JAVASCRIPT GAME ENGINE
+//  FLIP 7 — GAME ENGINE
 // ====================================================================
 
-const IMG = path => `images/${path}`;
-
+const IMG = p => `images/${p}`;
 const CARD_IMAGES = {
-  '0': IMG('0.png'),
-  '1': IMG('1.png'),
-  '2': IMG('2.png'),
-  '3': IMG('3.png'),
-  '4': IMG('4.png'),
-  '5': IMG('5.png'),
-  '6': IMG('6.png'),
-  '7': IMG('7.png'),
-  '8': IMG('8.png'),
-  '9': IMG('9.png'),
-  '10': IMG('10.png'),
-  '11': IMG('11.png'),
-  '12': IMG('12.png'),
-  '+4': IMG('+4.png'),
-  '+6': IMG('+6.png'),
-  '+8': IMG('+8.png'),
-  '+10': IMG('+10.png'),
-  'x2': IMG('x2.png'),
-  'freeze': IMG('freeze.png'),
-  'flipThree': IMG('flip-three.png'),
-  'secondChance': IMG('second-chance.png'),
-  'back': IMG('back-card.png'),
+  '0':IMG('0.png'),'1':IMG('1.png'),'2':IMG('2.png'),'3':IMG('3.png'),
+  '4':IMG('4.png'),'5':IMG('5.png'),'6':IMG('6.png'),'7':IMG('7.png'),
+  '8':IMG('8.png'),'9':IMG('9.png'),'10':IMG('10.png'),'11':IMG('11.png'),
+  '12':IMG('12.png'),'+4':IMG('+4.png'),'+6':IMG('+6.png'),'+8':IMG('+8.png'),
+  '+10':IMG('+10.png'),'x2':IMG('x2.png'),'freeze':IMG('freeze.png'),
+  'flipThree':IMG('flip-three.png'),'secondChance':IMG('second-chance.png'),
+  'back':IMG('back-card.png'),
 };
 
-// Deck config: number cards 0-12, bonus, multiplier, actions
 const DECK_CONFIG = [
-  // Number cards (count = value, min 1)
-  { type: 'number', value: 0,  count: 1 },
-  { type: 'number', value: 1,  count: 1 },
-  { type: 'number', value: 2,  count: 2 },
-  { type: 'number', value: 3,  count: 3 },
-  { type: 'number', value: 4,  count: 4 },
-  { type: 'number', value: 5,  count: 5 },
-  { type: 'number', value: 6,  count: 6 },
-  { type: 'number', value: 7,  count: 7 },
-  { type: 'number', value: 8,  count: 8 },
-  { type: 'number', value: 9,  count: 9 },
-  { type: 'number', value: 10, count: 10 },
-  { type: 'number', value: 11, count: 11 },
-  { type: 'number', value: 12, count: 12 },
-  // Bonus (flat add)
-  { type: 'bonus', value: '+4',  count: 1, points: 4 },
-  { type: 'bonus', value: '+6',  count: 1, points: 6 },
-  { type: 'bonus', value: '+8',  count: 1, points: 8 },
-  { type: 'bonus', value: '+10', count: 1, points: 10 },
-  // Multiplier
-  { type: 'multiplier', value: 'x2', count: 1, points: 0 },
-  // Actions
-  { type: 'action', value: 'freeze',        action: 'freeze',        count: 3 },
-  { type: 'action', value: 'flipThree',     action: 'flipThree',     count: 3 },
-  { type: 'action', value: 'secondChance',  action: 'secondChance',  count: 3 },
+  { type:'number', value:0,  count:1 },
+  { type:'number', value:1,  count:1 },
+  { type:'number', value:2,  count:2 },
+  { type:'number', value:3,  count:3 },
+  { type:'number', value:4,  count:4 },
+  { type:'number', value:5,  count:5 },
+  { type:'number', value:6,  count:6 },
+  { type:'number', value:7,  count:7 },
+  { type:'number', value:8,  count:8 },
+  { type:'number', value:9,  count:9 },
+  { type:'number', value:10, count:10 },
+  { type:'number', value:11, count:11 },
+  { type:'number', value:12, count:12 },
+  { type:'bonus',      value:'+4',  count:1, points:4 },
+  { type:'bonus',      value:'+6',  count:1, points:6 },
+  { type:'bonus',      value:'+8',  count:1, points:8 },
+  { type:'bonus',      value:'+10', count:1, points:10 },
+  { type:'multiplier', value:'x2',  count:1, points:0 },
+  { type:'action', value:'freeze',       action:'freeze',       count:3 },
+  { type:'action', value:'flipThree',    action:'flipThree',    count:3 },
+  { type:'action', value:'secondChance', action:'secondChance', count:3 },
 ];
 
-const WINNING_SCORE = 200;
-const FLIP7_BONUS   = 15;
-const STAY_BONUS    = 4;
-const PLAYER_COLORS = ['#e74c3c','#3498db','#2ecc71','#9b59b6'];
-const PLAYER_NAMES  = ['Player 1','Player 2','Player 3','Player 4'];
+const WINNING_SCORE  = 200;
+const FLIP7_BONUS    = 15;
+const STAY_BONUS     = 4;
+const PLAYER_COLORS  = ['#e74c3c','#3498db','#2ecc71','#9b59b6'];
+const PLAYER_NAMES   = ['Player 1','Player 2','Player 3','Player 4'];
 
 let _cardId = 0;
-function makeCard(cfg) {
-  return {
-    id: _cardId++,
-    type: cfg.type,
-    value: cfg.value,
-    action: cfg.action || null,
-    points: cfg.points ?? (cfg.type === 'number' ? cfg.value : 0),
-    imgKey: cfg.action || String(cfg.value),
-  };
-}
+const makeCard = cfg => ({
+  id: _cardId++, type: cfg.type, value: cfg.value,
+  action: cfg.action || null,
+  points: cfg.points ?? (cfg.type === 'number' ? cfg.value : 0),
+  imgKey: cfg.action || String(cfg.value),
+});
 
 function buildDeck() {
-  const deck = [];
-  for (const cfg of DECK_CONFIG) {
-    for (let i = 0; i < cfg.count; i++) deck.push(makeCard(cfg));
-  }
-  return shuffle(deck);
+  const d = [];
+  for (const cfg of DECK_CONFIG)
+    for (let i = 0; i < cfg.count; i++) d.push(makeCard(cfg));
+  return shuffle(d);
 }
-
-function shuffle(arr) {
-  const a = [...arr];
+function shuffle(a) {
+  a = [...a];
   for (let i = a.length - 1; i > 0; i--) {
     const j = Math.floor(Math.random() * (i + 1));
     [a[i], a[j]] = [a[j], a[i]];
@@ -578,36 +529,28 @@ function shuffle(arr) {
 // ====================================================================
 //  GAME STATE
 // ====================================================================
-let G = null; // global game state
+let G = null;
 
 function createPlayer(id, name, type, color) {
-  return {
-    id, name, type, color,
-    totalScore: 0,
-    // per-round
-    hand: [],       // number cards
-    bonusCards: [], // bonus, multiplier, secondChance
-    hasStayed: false,
-    isBusted: false,
-    isFrozen: false,
-  };
+  return { id, name, type, color, totalScore: 0,
+    hand: [], bonusCards: [], hasStayed: false, isBusted: false, isFrozen: false };
 }
 
 function startGame(playerDefs) {
+  const players = playerDefs.map((p, i) => createPlayer(i, p.name, p.type, PLAYER_COLORS[i]));
+  // Human player goes first each new game; find first human or default to 0
+  const humanIdx = players.findIndex(p => p.type === 'human');
   G = {
-    players: playerDefs.map((p, i) => createPlayer(i, p.name, p.type, PLAYER_COLORS[i])),
-    deck: [],
-    discard: [],
+    players,
+    deck: [], discard: [],
     round: 1,
+    roundStartIdx: humanIdx !== -1 ? humanIdx : 0,
     currentIdx: 0,
-    phase: 'playing', // 'playing' | 'roundEnd' | 'gameOver' | 'waitTarget' | 'waitSC' | 'forcedDraw' | 'flip7Anim'
+    phase: 'playing',
     log: '',
-    // forced draw state (FlipThree)
-    forcedDraw: null, // { targetId, remaining, pendingActions }
-    // second chance pending
-    scPending: null,  // { card, playerIdx }
-    // target selection
-    targetPending: null, // { action, actorIdx, card }
+    forcedDraw: null,
+    scPending: null,
+    targetPending: null,
     flip7PlayerId: null,
   };
   startRound();
@@ -615,30 +558,27 @@ function startGame(playerDefs) {
 
 function startRound() {
   for (const p of G.players) {
-    p.hand = [];
-    p.bonusCards = [];
-    p.hasStayed = false;
-    p.isBusted = false;
-    p.isFrozen = false;
+    p.hand = []; p.bonusCards = [];
+    p.hasStayed = false; p.isBusted = false; p.isFrozen = false;
   }
   G.phase = 'playing';
-  G.forcedDraw = null;
-  G.scPending = null;
-  G.targetPending = null;
-  G.flip7PlayerId = null;
-  // Replenish deck if needed
+  G.forcedDraw = null; G.scPending = null;
+  G.targetPending = null; G.flip7PlayerId = null;
+
   if (G.deck.length < 10) {
     G.deck = [...G.deck, ...shuffle(G.discard)];
     G.discard = [];
   }
   if (G.deck.length === 0) G.deck = buildDeck();
 
-  // Deal 1 card to each player
-  for (const p of G.players) {
-    dealOneToPlayer(p);
+  // Deal 1 card to each player starting from roundStartIdx, going left
+  const n = G.players.length;
+  for (let i = 0; i < n; i++) {
+    dealOneToPlayer(G.players[(G.roundStartIdx + i) % n]);
   }
 
-  G.currentIdx = 0;
+  // Current player is the round start player
+  G.currentIdx = G.roundStartIdx;
   renderGame();
   maybeAI();
 }
@@ -651,7 +591,6 @@ function reshuffleIfNeeded() {
   }
 }
 
-// Returns true if round should continue, false if over
 function dealOneToPlayer(player) {
   reshuffleIfNeeded();
   if (G.deck.length === 0) return null;
@@ -661,12 +600,8 @@ function dealOneToPlayer(player) {
   } else if (card.type === 'bonus' || card.type === 'multiplier') {
     player.bonusCards.push(card);
   } else if (card.type === 'action') {
-    if (card.action === 'secondChance') {
-      player.bonusCards.push(card);
-    } else {
-      // Freeze / FlipThree at round start — discard
-      G.discard.push(card);
-    }
+    if (card.action === 'secondChance') player.bonusCards.push(card);
+    else G.discard.push(card);
   }
   return card;
 }
@@ -675,8 +610,7 @@ function calcRoundScore(player) {
   if (player.isBusted) return 0;
   const nums = player.hand.filter(c => c.type === 'number');
   let sum = nums.reduce((s, c) => s + c.value, 0);
-  const hasX2 = player.bonusCards.some(c => c.type === 'multiplier');
-  if (hasX2) sum *= 2;
+  if (player.bonusCards.some(c => c.type === 'multiplier')) sum *= 2;
   const bonus = player.bonusCards.filter(c => c.type === 'bonus').reduce((s, c) => s + c.points, 0);
   const flip7 = G.flip7PlayerId === player.id ? FLIP7_BONUS : 0;
   const stay  = player.hasStayed ? STAY_BONUS : 0;
@@ -700,21 +634,19 @@ function setLog(msg) {
 //  TURN LOGIC
 // ====================================================================
 
-function activePlayerCount() {
-  return G.players.filter(p => !p.isBusted && !p.hasStayed).length;
-}
-
 function isRoundOver() {
-  const active = G.players.filter(p => !p.isBusted && !p.hasStayed);
-  return active.length === 0 || G.flip7PlayerId !== null;
+  return G.players.filter(p => !p.isBusted && !p.hasStayed).length === 0
+      || G.flip7PlayerId !== null;
 }
 
 function nextPlayer() {
   if (isRoundOver()) { endRound(); return; }
-  let next = (G.currentIdx + 1) % G.players.length;
+  // Advance left (next index in array = player to the left)
+  const n = G.players.length;
+  let next = (G.currentIdx + 1) % n;
   let tries = 0;
-  while ((G.players[next].isBusted || G.players[next].hasStayed) && tries < G.players.length) {
-    next = (next + 1) % G.players.length;
+  while ((G.players[next].isBusted || G.players[next].hasStayed) && tries < n) {
+    next = (next + 1) % n;
     tries++;
   }
   G.currentIdx = next;
@@ -735,9 +667,7 @@ function playerDraw() {
   const p = G.players[G.currentIdx];
   reshuffleIfNeeded();
   if (G.deck.length === 0) { playerStay(); return; }
-
   const card = G.deck.pop();
-  renderGame(); // optimistic
 
   if (card.type === 'action') {
     setLog(`${p.name} drew: ${card.value}`);
@@ -752,7 +682,7 @@ function playerDraw() {
     const vals = p.hand.map(c => c.value);
     const unique = new Set(vals);
     if (unique.size < vals.length) {
-      // Bust
+      // Would bust
       const scIdx = p.bonusCards.findIndex(c => c.action === 'secondChance');
       if (scIdx !== -1) {
         if (p.type === 'human') {
@@ -797,7 +727,6 @@ function handleActionCard(card, actor) {
   const action = card.action;
 
   if (action === 'secondChance') {
-    // Give to this player if they don't have one; else pass
     const alreadyHas = actor.bonusCards.some(c => c.action === 'secondChance');
     if (!alreadyHas) {
       actor.bonusCards.push(card);
@@ -805,7 +734,6 @@ function handleActionCard(card, actor) {
       renderGame();
       setTimeout(() => afterActionResolved(actor), 600);
     } else {
-      // Pass to another active player without one
       const recipients = G.players.filter(p =>
         p.id !== actor.id && !p.isBusted && !p.hasStayed &&
         !p.bonusCards.some(c => c.action === 'secondChance')
@@ -815,26 +743,21 @@ function handleActionCard(card, actor) {
         setLog(`${actor.name}'s extra Second Chance discarded.`);
         renderGame();
         setTimeout(() => afterActionResolved(actor), 600);
-      } else {
-        // For action resolution: actor has to give it to someone
-        // If human, let them pick; if AI, pick worst score
-        if (actor.type === 'human') {
-          G.targetPending = { action: 'giveSecondChance', actorIdx: actor.id, card };
-          G.phase = 'waitTarget';
-          showTargetModal('Give Second Chance to:', recipients, (target) => {
-            target.bonusCards.push(card);
-            setLog(`${actor.name} gave Second Chance to ${target.name}.`);
-            G.phase = 'playing';
-            renderGame();
-            setTimeout(() => afterActionResolved(actor), 400);
-          });
-        } else {
-          const target = aiPickTarget(actor, 'giveSecondChance', recipients);
+      } else if (actor.type === 'human') {
+        G.phase = 'waitTarget';
+        showTargetModal('Give Second Chance to:', recipients, target => {
           target.bonusCards.push(card);
           setLog(`${actor.name} gave Second Chance to ${target.name}.`);
+          G.phase = 'playing';
           renderGame();
-          setTimeout(() => afterActionResolved(actor), 600);
-        }
+          setTimeout(() => afterActionResolved(actor), 400);
+        });
+      } else {
+        const target = aiPickTarget(actor, 'giveSecondChance', recipients);
+        target.bonusCards.push(card);
+        setLog(`${actor.name} gave Second Chance to ${target.name}.`);
+        renderGame();
+        setTimeout(() => afterActionResolved(actor), 600);
       }
     }
     return;
@@ -844,18 +767,15 @@ function handleActionCard(card, actor) {
     const targets = G.players.filter(p => !p.isBusted && !p.hasStayed);
     if (actor.type === 'human') {
       G.phase = 'waitTarget';
-      showTargetModal('Freeze a player:', targets, (target) => {
-        target.hasStayed = true;
-        target.isFrozen = true;
+      showTargetModal('Freeze a player:', targets, target => {
+        target.hasStayed = true; target.isFrozen = true;
         setLog(`${actor.name} froze ${target.name}!`);
-        G.phase = 'playing';
-        renderGame();
+        G.phase = 'playing'; renderGame();
         setTimeout(() => afterActionResolved(actor), 400);
       });
     } else {
       const target = aiPickTarget(actor, 'freeze', targets);
-      target.hasStayed = true;
-      target.isFrozen = true;
+      target.hasStayed = true; target.isFrozen = true;
       setLog(`${actor.name} froze ${target.name}!`);
       renderGame();
       setTimeout(() => afterActionResolved(actor), 700);
@@ -867,7 +787,7 @@ function handleActionCard(card, actor) {
     const targets = G.players.filter(p => !p.isBusted && !p.hasStayed);
     if (actor.type === 'human') {
       G.phase = 'waitTarget';
-      showTargetModal('Flip Three: choose a player to draw 3 cards:', targets, (target) => {
+      showTargetModal('Flip Three — choose a player to draw 3 cards:', targets, target => {
         setLog(`${target.name} must draw 3 cards!`);
         G.phase = 'playing';
         G.forcedDraw = { targetId: target.id, remaining: 3, pendingActions: [] };
@@ -884,14 +804,12 @@ function handleActionCard(card, actor) {
     return;
   }
 
-  // Discard if none matched
   G.discard.push(card);
   afterActionResolved(actor);
 }
 
 function processForcedDraw() {
   if (!G.forcedDraw || G.forcedDraw.remaining <= 0) {
-    // Resolve pending actions from forced draw
     if (G.forcedDraw && G.forcedDraw.pendingActions.length > 0) {
       const { card, actor } = G.forcedDraw.pendingActions.shift();
       G.forcedDraw = null;
@@ -905,33 +823,19 @@ function processForcedDraw() {
 
   const fd = G.forcedDraw;
   const target = G.players.find(p => p.id === fd.targetId);
-
-  if (!target || target.isBusted) {
-    G.forcedDraw = null;
-    afterActionResolved(G.players[G.currentIdx]);
-    return;
-  }
+  if (!target || target.isBusted) { G.forcedDraw = null; afterActionResolved(G.players[G.currentIdx]); return; }
 
   reshuffleIfNeeded();
-  if (G.deck.length === 0) {
-    G.forcedDraw = null;
-    afterActionResolved(G.players[G.currentIdx]);
-    return;
-  }
+  if (G.deck.length === 0) { G.forcedDraw = null; afterActionResolved(G.players[G.currentIdx]); return; }
 
   const card = G.deck.pop();
   fd.remaining--;
   setLog(`${target.name} forced to draw: ${card.value}`);
 
   if (card.type === 'action') {
-    // Queue action for after forced draw completes
     fd.pendingActions.push({ card, actor: target });
     renderGame();
-    if (fd.remaining > 0 && !target.isBusted && G.flip7PlayerId === null) {
-      setTimeout(() => processForcedDraw(), 700);
-    } else {
-      setTimeout(() => processForcedDraw(), 700);
-    }
+    setTimeout(() => processForcedDraw(), 700);
     return;
   }
 
@@ -944,75 +848,50 @@ function processForcedDraw() {
       if (scIdx !== -1) {
         if (target.type === 'human') {
           G.scPending = { card, playerIdx: target.id };
-          G.phase = 'waitSC';
-          renderGame();
-          showSCModal(target, card);
-          return;
-        } else {
-          useSecondChance(target, card);
-        }
+          G.phase = 'waitSC'; renderGame();
+          showSCModal(target, card); return;
+        } else { useSecondChance(target, card); }
       } else {
         target.isBusted = true;
         setLog(`${target.name} BUSTED during Flip Three!`);
         G.forcedDraw = null;
       }
     } else if (unique.size === 7) {
-      G.flip7PlayerId = target.id;
-      G.forcedDraw = null;
-      renderGame();
-      showFlip7Anim(target, () => endRound());
-      return;
+      G.flip7PlayerId = target.id; G.forcedDraw = null;
+      renderGame(); showFlip7Anim(target, () => endRound()); return;
     }
   } else if (card.type === 'bonus' || card.type === 'multiplier') {
     target.bonusCards.push(card);
   }
 
   renderGame();
-
   if (target.isBusted || G.flip7PlayerId !== null) {
     G.forcedDraw = null;
-    if (G.flip7PlayerId === null) {
-      setTimeout(() => afterActionResolved(G.players[G.currentIdx]), 600);
-    }
+    if (G.flip7PlayerId === null) setTimeout(() => afterActionResolved(G.players[G.currentIdx]), 600);
     return;
   }
-
-  if (fd.remaining > 0) {
-    setTimeout(() => processForcedDraw(), 700);
-  } else {
-    setTimeout(() => processForcedDraw(), 700); // will resolve pending actions
-  }
+  setTimeout(() => processForcedDraw(), 700);
 }
 
 function useSecondChance(player, bustCard) {
   const scIdx = player.bonusCards.findIndex(c => c.action === 'secondChance');
-  if (scIdx !== -1) {
-    G.discard.push(player.bonusCards.splice(scIdx, 1)[0]);
-  }
-  const cardIdx = player.hand.findIndex(c => c.id === bustCard.id);
-  if (cardIdx !== -1) {
-    G.discard.push(player.hand.splice(cardIdx, 1)[0]);
-  }
+  if (scIdx !== -1) G.discard.push(player.bonusCards.splice(scIdx, 1)[0]);
+  const ci = player.hand.findIndex(c => c.id === bustCard.id);
+  if (ci !== -1) G.discard.push(player.hand.splice(ci, 1)[0]);
   setLog(`${player.name} used Second Chance!`);
 }
 
 function afterActionResolved(actor) {
   if (isRoundOver()) { endRound(); return; }
-  if (actor.type === 'human') {
-    renderGame();
-  } else {
-    setTimeout(() => nextPlayer(), 400);
-  }
+  if (actor.type === 'human') renderGame();
+  else setTimeout(() => nextPlayer(), 400);
 }
 
 function showFlip7Anim(player, cb) {
   const ov = document.getElementById('flip7-overlay');
   document.getElementById('flip7-who').textContent = `${player.name} collects 7 unique numbers!`;
   ov.classList.add('visible');
-  setTimeout(() => {
-    ov.classList.remove('visible');
-    cb();
-  }, 2800);
+  setTimeout(() => { ov.classList.remove('visible'); cb(); }, 2800);
 }
 
 // ====================================================================
@@ -1020,44 +899,34 @@ function showFlip7Anim(player, cb) {
 // ====================================================================
 function endRound() {
   G.phase = 'roundEnd';
-  // Score everyone
   const rows = G.players.map(p => {
     const roundScore = calcRoundScore(p);
     p.totalScore += roundScore;
     return { player: p, roundScore };
   });
-
   renderGame();
   showRoundModal(rows);
 }
 
 function showRoundModal(rows) {
   const table = document.getElementById('round-score-table');
-  table.innerHTML = `
-    <tr>
-      <th>Player</th><th>Round</th><th>Total</th>
-    </tr>
-    ${rows.map(r => {
+  table.innerHTML = `<tr><th>Player</th><th>Round</th><th>Total</th></tr>` +
+    rows.map(r => {
       const cls = r.player.isBusted ? 'busted-row' : (r.player.id === G.flip7PlayerId ? 'winner' : '');
-      const badge = r.player.id === G.flip7PlayerId ? '<span class="flip7-badge">★ FLIP 7</span>' : 
-                    (r.player.isFrozen ? '❄️' : (r.player.hasStayed && !r.player.isBusted ? '✓ stayed' : ''));
+      const badge = r.player.id === G.flip7PlayerId ? '<span class="flip7-badge">★ FLIP 7</span>'
+                  : r.player.isFrozen ? '❄️' : (r.player.hasStayed && !r.player.isBusted ? '✓' : '');
       return `<tr class="${cls}"><td>${r.player.name} ${badge}</td><td>+${r.roundScore}</td><td>${r.player.totalScore}</td></tr>`;
-    }).join('')}
-  `;
+    }).join('');
   document.getElementById('round-modal').classList.add('visible');
 }
 
 function nextRound() {
   document.getElementById('round-modal').classList.remove('visible');
-  // Check game over
   const winner = G.players.find(p => p.totalScore >= WINNING_SCORE);
-  if (winner) {
-    showGameOver(winner);
-    return;
-  }
+  if (winner) { showGameOver(winner); return; }
   G.round++;
-  // Advance dealer (pass deck left)
-  G.currentIdx = (G.currentIdx + 1) % G.players.length;
+  // Rotate starting player left each round
+  G.roundStartIdx = (G.roundStartIdx + 1) % G.players.length;
   startRound();
 }
 
@@ -1065,65 +934,49 @@ function showGameOver(winner) {
   G.phase = 'gameOver';
   document.getElementById('go-winner').innerHTML = `🏆 <strong>${winner.name}</strong> wins with ${winner.totalScore} points!`;
   const sorted = [...G.players].sort((a, b) => b.totalScore - a.totalScore);
-  document.getElementById('go-score-table').innerHTML = `
-    <tr><th>Rank</th><th>Player</th><th>Score</th></tr>
-    ${sorted.map((p, i) => `<tr class="${i===0?'winner':''}"><td>${i+1}</td><td>${p.name}</td><td>${p.totalScore}</td></tr>`).join('')}
-  `;
+  document.getElementById('go-score-table').innerHTML =
+    `<tr><th>Rank</th><th>Player</th><th>Score</th></tr>` +
+    sorted.map((p, i) => `<tr class="${i===0?'winner':''}"><td>${i+1}</td><td>${p.name}</td><td>${p.totalScore}</td></tr>`).join('');
   document.getElementById('gameover-modal').classList.add('visible');
 }
 
 // ====================================================================
-//  AI LOGIC
+//  AI
 // ====================================================================
-
 function maybeAI() {
   const p = G.players[G.currentIdx];
   if (!p || p.type === 'human' || p.isBusted || p.hasStayed || G.phase !== 'playing') return;
   setTimeout(() => {
     if (G.phase !== 'playing') return;
-    const decision = aiDecide(p);
-    if (decision === 'stay') {
-      playerStay();
-    } else {
-      playerDraw();
-    }
+    aiDecide(p) === 'stay' ? playerStay() : playerDraw();
   }, 700 + Math.random() * 400);
 }
 
 function aiDecide(player) {
   const nums = player.hand.filter(c => c.type === 'number');
-  if (nums.length === 0) return 'draw'; // always draw first card
-
+  if (nums.length === 0) return 'draw';
   const score = calcRoundScore(player);
   const bp = bustProb(player);
-  const numCards = nums.length;
-
+  const n = nums.length;
   switch (player.type) {
     case 'ai-easy':
-      // Random with mild bias toward draw
-      if (numCards >= 4 && Math.random() < 0.4) return 'stay';
+      if (n >= 4 && Math.random() < 0.4) return 'stay';
       if (bp > 0.5) return Math.random() < 0.5 ? 'stay' : 'draw';
       return Math.random() < 0.7 ? 'draw' : 'stay';
-
-    case 'ai-normal': {
-      // Stay if score is good and bust risk is moderate
+    case 'ai-normal':
       if (player.totalScore + score >= WINNING_SCORE) return 'stay';
       if (score >= 30 && bp > 0.3) return 'stay';
       if (score >= 20 && bp > 0.45) return 'stay';
       if (bp > 0.55) return 'stay';
       return 'draw';
-    }
-
-    case 'ai-hard': {
-      // Optimal play based on bust probability and progress
+    case 'ai-hard':
       if (player.totalScore + score >= WINNING_SCORE) return 'stay';
-      if (player.bonusCards.some(c => c.action === 'secondChance')) return 'draw'; // aggressive with SC
-      if (numCards >= 5 && bp < 0.35) return 'draw'; // going for Flip 7
+      if (player.bonusCards.some(c => c.action === 'secondChance')) return 'draw';
+      if (n >= 5 && bp < 0.35) return 'draw';
       if (score >= 35) return 'stay';
       if (bp > 0.4) return 'stay';
       if (score >= 20 && bp > 0.3) return 'stay';
       return 'draw';
-    }
   }
   return 'draw';
 }
@@ -1131,24 +984,18 @@ function aiDecide(player) {
 function aiPickTarget(actor, action, targets) {
   if (targets.length === 1) return targets[0];
   const others = targets.filter(t => t.id !== actor.id);
-
   switch (action) {
-    case 'freeze':
-    case 'flipThree':
-      // Target highest scorer
+    case 'freeze': case 'flipThree':
       return (others.length > 0 ? others : targets).sort((a, b) =>
-        (b.totalScore + calcRoundScore(b)) - (a.totalScore + calcRoundScore(a))
-      )[0];
+        (b.totalScore + calcRoundScore(b)) - (a.totalScore + calcRoundScore(a)))[0];
     case 'giveSecondChance':
-      // Give to lowest scorer
       return targets.sort((a, b) => a.totalScore - b.totalScore)[0];
-    default:
-      return targets[0];
   }
+  return targets[0];
 }
 
 // ====================================================================
-//  TARGET MODAL (human player targeting)
+//  MODALS
 // ====================================================================
 function showTargetModal(title, players, onSelect) {
   const overlay = document.getElementById('target-overlay');
@@ -1158,19 +1005,13 @@ function showTargetModal(title, players, onSelect) {
   for (const p of players) {
     const btn = document.createElement('button');
     btn.className = 'btn-target';
-    btn.textContent = `${p.name}  (${p.totalScore} pts total)`;
-    btn.onclick = () => {
-      overlay.classList.remove('visible');
-      onSelect(p);
-    };
+    btn.textContent = `${p.name}  (${p.totalScore} pts)`;
+    btn.onclick = () => { overlay.classList.remove('visible'); onSelect(p); };
     btns.appendChild(btn);
   }
   overlay.classList.add('visible');
 }
 
-// ====================================================================
-//  SECOND CHANCE MODAL
-// ====================================================================
 function showSCModal(player, card) {
   document.getElementById('sc-text').textContent =
     `${player.name} drew a duplicate ${card.value}. Use Second Chance to survive?`;
@@ -1180,11 +1021,9 @@ function showSCModal(player, card) {
 // ====================================================================
 //  RENDER
 // ====================================================================
-
-function cardEl(card, size = '') {
+function cardEl(card, sizeClass = '') {
   const div = document.createElement('div');
-  div.className = `card ${size}`;
-  div.dataset.cardId = card.id;
+  div.className = `card ${sizeClass}`;
   const img = document.createElement('img');
   img.src = CARD_IMAGES[card.imgKey] || CARD_IMAGES[String(card.value)];
   img.alt = String(card.value);
@@ -1193,101 +1032,108 @@ function cardEl(card, size = '') {
   return div;
 }
 
-function backCardEl(size = '') {
+function backCardEl(sizeClass = '') {
   const div = document.createElement('div');
-  div.className = `card ${size}`;
+  div.className = `card ${sizeClass}`;
   const img = document.createElement('img');
-  img.src = CARD_IMAGES['back'];
-  img.alt = 'card back';
+  img.src = CARD_IMAGES['back']; img.alt = 'card';
   div.appendChild(img);
   return div;
 }
 
-function renderSmallPlayer(player) {
-  const isCurrentPlayer = player.id === G.players[G.currentIdx].id;
+function renderOpponent(player) {
+  const isCurrent = player.id === G.players[G.currentIdx].id;
+  let cls = 'player-area opp';
+  if (isCurrent && !player.isBusted && !player.hasStayed) cls += ' current-player';
+  if (player.isBusted) cls += ' busted';
+  else if (player.isFrozen) cls += ' frozen';
+  else if (player.hasStayed) cls += ' stayed';
+
   const area = document.createElement('div');
-  area.className = `player-area player-area-small${isCurrentPlayer && !player.isBusted && !player.hasStayed ? ' current-player' : ''}${player.isBusted ? ' busted' : ''}${player.hasStayed ? ' stayed' : ''}${player.isFrozen ? ' frozen' : ''}`;
+  area.className = cls;
+
+  let badge = '';
+  if (player.isBusted) badge = '<span class="status-badge badge-busted">BUSTED</span>';
+  else if (player.isFrozen) badge = '<span class="status-badge badge-frozen">FROZEN</span>';
+  else if (player.hasStayed) badge = '<span class="status-badge badge-stayed">STAYED</span>';
+  else if (isCurrent) badge = '<span class="status-badge badge-active">ACTIVE</span>';
 
   const roundScore = calcRoundScore(player);
-  let statusBadge = '';
-  if (player.isBusted) statusBadge = '<span class="status-badge badge-busted">BUSTED</span>';
-  else if (player.isFrozen) statusBadge = '<span class="status-badge badge-frozen">FROZEN</span>';
-  else if (player.hasStayed) statusBadge = '<span class="status-badge badge-stayed">STAYED</span>';
-  else if (isCurrentPlayer) statusBadge = '<span class="status-badge badge-active">ACTIVE</span>';
 
   area.innerHTML = `
     <div class="player-header">
       <div class="player-avatar" style="background:${player.color}">${player.name[0]}</div>
       <div class="player-name-display">${player.name}</div>
-      <div class="player-total-score">${player.totalScore}</div>
-      ${statusBadge}
+      <div class="player-total-score">${player.totalScore} pts</div>
+      ${badge}
     </div>
   `;
 
-  // Cards
   const hand = document.createElement('div');
   hand.className = 'hand';
-  for (const c of player.hand) hand.appendChild(cardEl(c, 'tiny'));
-  for (const c of player.bonusCards) hand.appendChild(cardEl(c, 'tiny'));
-  if (player.isBusted || player.hasStayed) {
-    // Show face-down indicator
-    if (player.hand.length === 0 && player.bonusCards.length === 0) {
-      hand.appendChild(backCardEl('tiny'));
-    }
-  }
+  for (const c of player.hand) hand.appendChild(cardEl(c, 'xs'));
+  for (const c of player.bonusCards) hand.appendChild(cardEl(c, 'xs'));
+  if ((player.isBusted || player.hasStayed) && player.hand.length === 0 && player.bonusCards.length === 0)
+    hand.appendChild(backCardEl('xs'));
   area.appendChild(hand);
 
-  const scoreInfo = document.createElement('div');
-  scoreInfo.style.cssText = 'font-size:0.7rem;color:var(--muted);margin-top:3px;';
-  scoreInfo.textContent = player.isBusted ? 'BUST' : `Round: ${roundScore}`;
-  area.appendChild(scoreInfo);
+  const info = document.createElement('div');
+  info.className = 'opp-round-score';
+  info.textContent = player.isBusted ? 'BUST — 0 pts' : `Round: ${roundScore} pts`;
+  area.appendChild(info);
 
   return area;
 }
 
-function renderMainPlayer(player) {
+function renderHuman(player) {
   const roundScore = calcRoundScore(player);
   const bp = bustProb(player);
   const bpPct = Math.round(bp * 100);
   const numCards = player.hand.filter(c => c.type === 'number').length;
-  const canAct = !player.isBusted && !player.hasStayed && !player.isFrozen && G.phase === 'playing';
+  const isMyTurn = player.id === G.players[G.currentIdx].id;
+  const canAct = isMyTurn && !player.isBusted && !player.hasStayed && !player.isFrozen && G.phase === 'playing';
 
   const area = document.createElement('div');
-  area.className = `main-player-area`;
+  area.className = 'human-area';
 
   let statusText = '';
-  if (player.isBusted) statusText = '<span style="color:var(--red);font-weight:700;">BUSTED</span>';
-  else if (player.isFrozen) statusText = '<span style="color:var(--blue);">FROZEN (Stayed)</span>';
-  else if (player.hasStayed) statusText = '<span style="color:var(--green);">STAYED</span>';
+  if (player.isBusted) statusText = `<span style="color:var(--red);font-weight:700;">BUSTED</span>`;
+  else if (player.isFrozen) statusText = `<span style="color:var(--blue);">FROZEN</span>`;
+  else if (player.hasStayed) statusText = `<span style="color:var(--green);">STAYED</span>`;
+  else if (isMyTurn) statusText = `<span style="color:var(--gold);">YOUR TURN</span>`;
+  else statusText = `<span style="color:var(--muted);">Waiting…</span>`;
 
-  area.innerHTML = `
-    <div class="main-player-header">
-      <div class="player-avatar" style="background:${player.color};width:32px;height:32px;font-size:1rem;">${player.name[0]}</div>
-      <div class="main-player-name">${player.name}</div>
-      <div class="main-player-score">${player.totalScore} pts</div>
-      <div class="main-player-status">${statusText}</div>
-    </div>
+  // Header
+  const hdr = document.createElement('div');
+  hdr.className = 'human-header';
+  hdr.innerHTML = `
+    <div class="player-avatar" style="background:${player.color};width:clamp(24px,2.5vw,40px);height:clamp(24px,2.5vw,40px);font-size:clamp(0.8rem,1.2vw,1.2rem);">${player.name[0]}</div>
+    <div class="human-name">${player.name}</div>
+    <div class="human-score">${player.totalScore} pts</div>
+    <div class="human-status">${statusText}</div>
   `;
+  area.appendChild(hdr);
 
+  // Cards row
   const cardsRow = document.createElement('div');
-  cardsRow.className = 'main-cards-row';
+  cardsRow.className = 'human-cards-row';
 
-  // Number cards section
+  // Number cards
   const numSec = document.createElement('div');
-  numSec.className = 'hand-section';
+  numSec.className = 'hand-section grow';
   numSec.innerHTML = `<label>Cards (${numCards}/7)</label>`;
   const numHand = document.createElement('div');
   numHand.className = 'hand';
-  for (const c of player.hand) numHand.appendChild(cardEl(c, 'small'));
+  for (const c of player.hand) numHand.appendChild(cardEl(c, 'sm'));
   numSec.appendChild(numHand);
 
-  // Bonus section
+  // Bonus / special
   const bonSec = document.createElement('div');
   bonSec.className = 'hand-section';
   bonSec.innerHTML = `<label>Bonus / Special</label>`;
   const bonHand = document.createElement('div');
   bonHand.className = 'hand';
-  for (const c of player.bonusCards) bonHand.appendChild(cardEl(c, 'small'));
+  for (const c of player.bonusCards) bonHand.appendChild(cardEl(c, 'sm'));
   bonSec.appendChild(bonHand);
 
   // Deck
@@ -1296,8 +1142,7 @@ function renderMainPlayer(player) {
   const dc = document.createElement('div');
   dc.className = 'deck-card-display';
   const dimg = document.createElement('img');
-  dimg.src = CARD_IMAGES['back'];
-  dimg.alt = 'deck';
+  dimg.src = CARD_IMAGES['back']; dimg.alt = 'deck';
   dc.appendChild(dimg);
   const dcnt = document.createElement('div');
   dcnt.className = 'deck-count';
@@ -1311,15 +1156,16 @@ function renderMainPlayer(player) {
   area.appendChild(cardsRow);
 
   // Score info
-  const scoreRow = document.createElement('div');
-  scoreRow.className = 'round-score-display';
-  scoreRow.innerHTML = `Round score: <strong>${roundScore}</strong> &nbsp;|&nbsp; Bust risk: <strong style="color:${bpPct > 40 ? 'var(--red)' : bpPct > 25 ? '#e67e22' : 'var(--green)'}">${bpPct}%</strong>`;
-  area.appendChild(scoreRow);
+  const infoRow = document.createElement('div');
+  infoRow.className = 'human-info-row';
+  infoRow.innerHTML = `Round score: <strong>${roundScore}</strong> &nbsp;|&nbsp; Bust risk: <strong style="color:${bpPct > 40 ? 'var(--red)' : bpPct > 25 ? '#e67e22' : 'var(--green)'}">${bpPct}%</strong>`;
+  area.appendChild(infoRow);
 
-  // Action buttons
-  if (canAct && G.phase === 'playing') {
+  // Buttons
+  if (canAct) {
     const actRow = document.createElement('div');
     actRow.className = 'actions-row';
+
     const btnDraw = document.createElement('button');
     btnDraw.className = 'btn-action btn-draw';
     btnDraw.textContent = '🃏 Draw';
@@ -1328,7 +1174,7 @@ function renderMainPlayer(player) {
     const btnStay = document.createElement('button');
     btnStay.className = 'btn-action btn-stay';
     btnStay.textContent = '✋ Stay (+4)';
-    if (player.hand.length === 0) btnStay.disabled = true;
+    if (numCards === 0) btnStay.disabled = true;
     btnStay.onclick = () => playerStay();
 
     actRow.appendChild(btnDraw);
@@ -1343,30 +1189,24 @@ function renderGame() {
   if (!G) return;
   document.getElementById('round-info').textContent = `Round ${G.round}`;
 
-  const body = document.getElementById('game-body');
-  body.className = 'game-body layout-' + G.players.length;
+  const oppZone = document.getElementById('zone-opponents');
+  const humZone = document.getElementById('zone-human');
+  oppZone.innerHTML = '';
+  humZone.innerHTML = '';
 
-  const zoneTop = document.getElementById('zone-top');
-  const zoneBottom = document.getElementById('zone-bottom');
-  zoneTop.innerHTML = '';
-  zoneBottom.innerHTML = '';
-
-  // Find human player index for bottom
-  // If all AI, show current player at bottom
+  // Always show human player at bottom; if no human, show current player at bottom
   const humanIdx = G.players.findIndex(p => p.type === 'human');
   const mainIdx = humanIdx !== -1 ? humanIdx : G.currentIdx;
 
-  const others = G.players.filter((_, i) => i !== mainIdx);
-  for (const p of others) {
-    zoneTop.appendChild(renderSmallPlayer(p));
+  for (let i = 0; i < G.players.length; i++) {
+    if (i !== mainIdx) oppZone.appendChild(renderOpponent(G.players[i]));
   }
-  zoneBottom.appendChild(renderMainPlayer(G.players[mainIdx]));
+  humZone.appendChild(renderHuman(G.players[mainIdx]));
 }
 
 // ====================================================================
 //  SETUP UI
 // ====================================================================
-const COLORS = PLAYER_COLORS;
 let numPlayers = 3;
 
 function buildSetupRows() {
@@ -1376,7 +1216,7 @@ function buildSetupRows() {
     const row = document.createElement('div');
     row.className = 'player-row';
     row.innerHTML = `
-      <div class="player-avatar pnum" style="background:${COLORS[i]}">${i+1}</div>
+      <div class="player-avatar pnum" style="background:${PLAYER_COLORS[i]}">${i+1}</div>
       <input class="pname-input" type="text" value="${PLAYER_NAMES[i]}" placeholder="Name" id="pname-${i}">
       <select id="ptype-${i}">
         <option value="human">👤 Human</option>
@@ -1387,11 +1227,9 @@ function buildSetupRows() {
     `;
     container.appendChild(row);
   }
-  // Set defaults: first human, rest AI Normal
   for (let i = 0; i < numPlayers; i++) {
     const sel = document.getElementById(`ptype-${i}`);
-    if (i === 0) sel.value = 'human';
-    else sel.value = 'ai-normal';
+    sel.value = i === 0 ? 'human' : 'ai-normal';
   }
 }
 
@@ -1413,18 +1251,31 @@ document.getElementById('btn-start').addEventListener('click', () => {
   }
   document.getElementById('setup-screen').classList.remove('active');
   document.getElementById('game-screen').classList.add('active');
-  G = null;
   startGame(playerDefs);
 });
 
+// Menu → pause overlay (keeps G intact)
 document.getElementById('btn-menu').addEventListener('click', () => {
+  document.getElementById('pause-overlay').classList.add('visible');
+});
+
+// Resume → hide pause overlay, stay in game
+document.getElementById('btn-resume').addEventListener('click', () => {
+  document.getElementById('pause-overlay').classList.remove('visible');
+  // If it was an AI's turn, restart AI clock
+  if (G && G.phase === 'playing') maybeAI();
+});
+
+// New Game from pause menu
+document.getElementById('btn-new-game-pause').addEventListener('click', () => {
+  document.getElementById('pause-overlay').classList.remove('visible');
   document.getElementById('game-screen').classList.remove('active');
-  document.getElementById('setup-screen').classList.add('active');
   document.getElementById('round-modal').classList.remove('visible');
   document.getElementById('gameover-modal').classList.remove('visible');
   document.getElementById('flip7-overlay').classList.remove('visible');
   document.getElementById('sc-modal').classList.remove('visible');
   document.getElementById('target-overlay').classList.remove('visible');
+  document.getElementById('setup-screen').classList.add('active');
   G = null;
 });
 
@@ -1437,6 +1288,7 @@ document.getElementById('btn-new-game').addEventListener('click', () => {
   document.getElementById('gameover-modal').classList.remove('visible');
   document.getElementById('game-screen').classList.remove('active');
   document.getElementById('setup-screen').classList.add('active');
+  G = null;
 });
 
 document.getElementById('btn-use-sc').addEventListener('click', () => {
@@ -1444,12 +1296,10 @@ document.getElementById('btn-use-sc').addEventListener('click', () => {
   if (!G.scPending) return;
   const player = G.players.find(p => p.id === G.scPending.playerIdx);
   useSecondChance(player, G.scPending.card);
-  G.scPending = null;
-  G.phase = 'playing';
+  G.scPending = null; G.phase = 'playing';
   renderGame();
   if (isRoundOver()) { endRound(); return; }
   if (player.type !== 'human') setTimeout(() => nextPlayer(), 400);
-  else setTimeout(() => { if (G.phase === 'playing') renderGame(); }, 200);
 });
 
 document.getElementById('btn-skip-sc').addEventListener('click', () => {
@@ -1457,15 +1307,24 @@ document.getElementById('btn-skip-sc').addEventListener('click', () => {
   if (!G.scPending) return;
   const player = G.players.find(p => p.id === G.scPending.playerIdx);
   player.isBusted = true;
-  setLog(`${player.name} chose to bust.`);
-  G.scPending = null;
-  G.phase = 'playing';
+  setLog(`${player.name} accepted the bust.`);
+  G.scPending = null; G.phase = 'playing';
   renderGame();
   if (isRoundOver()) { endRound(); return; }
   setTimeout(() => nextPlayer(), 600);
 });
 
-// Initial setup render
+// Close pause on Escape
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') {
+    const po = document.getElementById('pause-overlay');
+    if (po.classList.contains('visible')) {
+      po.classList.remove('visible');
+      if (G && G.phase === 'playing') maybeAI();
+    }
+  }
+});
+
 buildSetupRows();
 </script>
 </body>
