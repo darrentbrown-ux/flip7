@@ -144,7 +144,13 @@ body {
   border-top: 1px solid rgba(255,255,255,0.07);
   min-height: 0;
   overflow: hidden;
+  border: 2px solid transparent;
+  transition: border-color 0.3s, background 0.3s;
 }
+.zone-human.busted { background: rgba(192,57,43,0.15); border-color: rgba(192,57,43,0.4); }
+.zone-human.stayed { background: rgba(39,174,96,0.1); border-color: rgba(39,174,96,0.3); }
+.zone-human.frozen { background: rgba(41,128,185,0.1); border-color: rgba(41,128,185,0.4); }
+.zone-human.current-player { border-color: var(--gold); box-shadow: 0 0 15px rgba(245,200,66,0.2) inset; }
 
 /* ===== OPPONENT PLAYER AREA ===== */
 .player-area {
@@ -679,12 +685,24 @@ function getDeckRect() {
   return dc ? dc.getBoundingClientRect() : null;
 }
 
-function getHandRect(isHuman) {
-  // For human player: target the num-hand area; for opponents: their hand div
-  const zones = isHuman
-    ? document.querySelectorAll('#zone-human .hand')
-    : document.querySelectorAll('#zone-opponents .hand');
-  // pick first visible one
+function getHandRect(player) {
+  if (player.type === 'human') {
+    // Human is always in #zone-human
+    const zones = document.querySelectorAll('#zone-human .hand');
+    for (const h of zones) {
+      const r = h.getBoundingClientRect();
+      if (r.width > 0) return r;
+    }
+    return null;
+  }
+  // Opponent: find their specific player-area by data-player-id
+  const area = document.querySelector(`[data-player-id="${player.id}"] .hand`);
+  if (area) {
+    const r = area.getBoundingClientRect();
+    if (r.width > 0) return r;
+  }
+  // Fallback: first visible hand in opponents zone
+  const zones = document.querySelectorAll('#zone-opponents .hand');
   for (const h of zones) {
     const r = h.getBoundingClientRect();
     if (r.width > 0) return r;
@@ -779,18 +797,16 @@ function playerDraw() {
   if (G.deck.length === 0) { playerStay(); return; }
   const card = G.deck.pop();
 
-  // Determine where the card is flying to
-  const isHuman = p.type === 'human';
-  const toRect = getHandRect(isHuman);
+  const toRect = getHandRect(p);
 
   // Disable only the in-game action buttons during animation (not modal buttons)
   document.querySelectorAll('#zone-human .btn-action').forEach(b => b.disabled = true);
 
   // Show the card flying (face-up for human, face-down for AI — reveal after)
-  const flyKey = isHuman ? (card.imgKey || String(card.value)) : 'back';
+  const flyKey = p.type === 'human' ? (card.imgKey || String(card.value)) : 'back';
   animateDeal(flyKey, toRect, () => {
     // Animation done — now process the card
-    _processDrawnCard(p, card, isHuman);
+    _processDrawnCard(p, card, p.type === 'human');
   });
 }
 
@@ -1193,6 +1209,7 @@ function renderOpponent(player) {
 
   const area = document.createElement('div');
   area.className = cls;
+  area.dataset.playerId = player.id;
 
   let badge = '';
   if (player.isBusted) badge = '<span class="status-badge badge-busted">BUSTED</span>';
@@ -1373,7 +1390,17 @@ function renderGame() {
   for (let i = 0; i < G.players.length; i++) {
     if (i !== mainIdx) oppZone.appendChild(renderOpponent(G.players[i]));
   }
-  humZone.appendChild(renderHuman(G.players[mainIdx]));
+
+  // Apply state classes to human zone
+  const hp = G.players[mainIdx];
+  const isHumanTurn = hp.id === G.players[G.currentIdx].id;
+  humZone.className = 'zone-human';
+  if (hp.isBusted) humZone.classList.add('busted');
+  else if (hp.isFrozen) humZone.classList.add('frozen');
+  else if (hp.hasStayed) humZone.classList.add('stayed');
+  else if (isHumanTurn && G.phase === 'playing') humZone.classList.add('current-player');
+
+  humZone.appendChild(renderHuman(hp));
 }
 
 // ====================================================================
