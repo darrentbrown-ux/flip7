@@ -640,18 +640,31 @@ function reshuffleIfNeeded() {
 }
 
 function dealOneToPlayer(player) {
-  reshuffleIfNeeded();
-  if (G.deck.length === 0) return null;
-  const card = G.deck.pop();
-  if (card.type === 'number') {
-    player.hand.push(card);
-  } else if (card.type === 'bonus' || card.type === 'multiplier') {
-    player.bonusCards.push(card);
-  } else if (card.type === 'action') {
-    if (card.action === 'secondChance') player.bonusCards.push(card);
-    else G.discard.push(card);
+  // Keep drawing until player gets a usable card (number, bonus, or secondChance).
+  // Freeze/FlipThree dealt at round-start go to discard and we try again.
+  let attempts = 0;
+  while (attempts < 100) {
+    reshuffleIfNeeded();
+    if (G.deck.length === 0) return null;
+    const card = G.deck.pop();
+    attempts++;
+    if (card.type === 'number') {
+      player.hand.push(card);
+      return card;
+    } else if (card.type === 'bonus' || card.type === 'multiplier') {
+      player.bonusCards.push(card);
+      return card;
+    } else if (card.type === 'action') {
+      if (card.action === 'secondChance') {
+        player.bonusCards.push(card);
+        return card;
+      } else {
+        // Freeze / FlipThree — discard and redeal
+        G.discard.push(card);
+      }
+    }
   }
-  return card;
+  return null;
 }
 
 function calcRoundScore(player) {
