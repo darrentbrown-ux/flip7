@@ -990,8 +990,8 @@ function useSecondChance(player, bustCard) {
 
 function afterActionResolved(actor) {
   if (isRoundOver()) { endRound(); return; }
-  if (actor.type === 'human') renderGame();
-  else setTimeout(() => nextPlayer(), 400);
+  // Always advance to next player — human's draw/stay already happened
+  setTimeout(() => nextPlayer(), 400);
 }
 
 function showFlip7Anim(player, cb) {
@@ -1267,31 +1267,31 @@ function renderHuman(player) {
   }
 
   // Score info
+  // Score info — always visible
   const infoRow = document.createElement('div');
   infoRow.className = 'human-info-row';
   infoRow.innerHTML = `Round score: <strong>${roundScore}</strong> &nbsp;|&nbsp; Bust risk: <strong style="color:${bpPct > 40 ? 'var(--red)' : bpPct > 25 ? '#e67e22' : 'var(--green)'}">${bpPct}%</strong>`;
   area.appendChild(infoRow);
 
-  // Buttons
-  if (canAct) {
-    const actRow = document.createElement('div');
-    actRow.className = 'actions-row';
+  // Buttons — always shown, disabled when not actionable
+  const actRow = document.createElement('div');
+  actRow.className = 'actions-row';
 
-    const btnDraw = document.createElement('button');
-    btnDraw.className = 'btn-action btn-draw';
-    btnDraw.textContent = '🃏 Draw';
-    btnDraw.onclick = () => playerDraw();
+  const btnDraw = document.createElement('button');
+  btnDraw.className = 'btn-action btn-draw';
+  btnDraw.textContent = '🃏 Draw';
+  btnDraw.disabled = !canAct;
+  if (canAct) btnDraw.onclick = () => playerDraw();
 
-    const btnStay = document.createElement('button');
-    btnStay.className = 'btn-action btn-stay';
-    btnStay.textContent = '✋ Stay (+4)';
-    if (numCards === 0) btnStay.disabled = true;
-    btnStay.onclick = () => playerStay();
+  const btnStay = document.createElement('button');
+  btnStay.className = 'btn-action btn-stay';
+  btnStay.textContent = '✋ Stay (+4)';
+  btnStay.disabled = !canAct || numCards === 0;
+  if (canAct && numCards > 0) btnStay.onclick = () => playerStay();
 
-    actRow.appendChild(btnDraw);
-    actRow.appendChild(btnStay);
-    area.appendChild(actRow);
-  }
+  actRow.appendChild(btnDraw);
+  actRow.appendChild(btnStay);
+  area.appendChild(actRow);
 
   return area;
 }
