@@ -19,13 +19,13 @@
   --card-bg: #fffdf0;
   --card-border: #c8a951;
   --radius: 10px;
-  /* Cards scale with viewport */
-  --card-w: clamp(52px, 4.5vw, 90px);
-  --card-h: clamp(78px, 6.75vw, 135px);
-  --card-sm-w: clamp(38px, 3vw, 64px);
-  --card-sm-h: clamp(57px, 4.5vw, 96px);
-  --card-xs-w: clamp(28px, 2.2vw, 48px);
-  --card-xs-h: clamp(42px, 3.3vw, 72px);
+  /* Cards scale with viewport — doubled base sizes */
+  --card-w: clamp(90px, 8vw, 160px);
+  --card-h: clamp(135px, 12vw, 240px);
+  --card-sm-w: clamp(64px, 5.5vw, 110px);
+  --card-sm-h: clamp(96px, 8.25vw, 165px);
+  --card-xs-w: clamp(48px, 4vw, 80px);
+  --card-xs-h: clamp(72px, 6vw, 120px);
 }
 * { box-sizing: border-box; margin: 0; padding: 0; }
 html, body { height: 100%; overflow: hidden; }
@@ -247,6 +247,7 @@ body {
 
 .actions-row {
   display: flex; gap: clamp(0.5rem, 1vw, 1rem); align-items: center; flex-wrap: wrap;
+  justify-content: center;
   flex-shrink: 0; padding-top: clamp(4px, 0.5vh, 8px);
 }
 .btn-action {
@@ -361,6 +362,24 @@ body {
 @keyframes bounce { from { transform: scale(1); } to { transform: scale(1.05); } }
 .flip7-sub { font-size: clamp(1rem, 2vw, 1.5rem); color: white; }
 .flip7-bonus { font-size: clamp(1.3rem, 2.5vw, 2rem); font-weight: 700; color: #66ff99; }
+
+/* ===== CARD DEAL ANIMATION ===== */
+.flying-card {
+  position: fixed;
+  z-index: 500;
+  pointer-events: none;
+  border-radius: clamp(5px, 0.6vw, 10px);
+  border: 2px solid var(--card-border);
+  background: var(--card-bg);
+  overflow: hidden;
+  will-change: transform, opacity;
+}
+.flying-card img { width: 100%; height: 100%; object-fit: contain; }
+@keyframes fly-to-hand {
+  0%   { transform: translate(0,0) scale(1); opacity: 1; }
+  40%  { transform: translate(var(--fly-x-mid), var(--fly-y-mid)) scale(1.15); opacity: 1; }
+  100% { transform: translate(var(--fly-x), var(--fly-y)) scale(0.85); opacity: 0; }
+}
 
 /* ===== SECOND CHANCE MODAL ===== */
 .sc-modal h3 { color: var(--purple); margin-bottom: 0.5rem; }
@@ -631,6 +650,75 @@ function setLog(msg) {
 }
 
 // ====================================================================
+//  CARD DEAL ANIMATION
+// ====================================================================
+function getDeckRect() {
+  const dc = document.querySelector('.deck-card-display');
+  return dc ? dc.getBoundingClientRect() : null;
+}
+
+function getHandRect(isHuman) {
+  // For human player: target the num-hand area; for opponents: their hand div
+  const zones = isHuman
+    ? document.querySelectorAll('#zone-human .hand')
+    : document.querySelectorAll('#zone-opponents .hand');
+  // pick first visible one
+  for (const h of zones) {
+    const r = h.getBoundingClientRect();
+    if (r.width > 0) return r;
+  }
+  return null;
+}
+
+/**
+ * Animate a card flying from the deck to the target hand area.
+ * imgKey: card image key (or 'back' for face-down).
+ * toRect: destination getBoundingClientRect().
+ * cb: called after animation completes.
+ */
+function animateDeal(imgKey, toRect, cb) {
+  const fromRect = getDeckRect();
+  if (!fromRect || !toRect) { cb(); return; }
+
+  const w = fromRect.width;
+  const h = fromRect.height;
+
+  const fly = document.createElement('div');
+  fly.className = 'flying-card';
+  fly.style.cssText = `
+    left: ${fromRect.left}px;
+    top: ${fromRect.top}px;
+    width: ${w}px;
+    height: ${h}px;
+  `;
+  const img = document.createElement('img');
+  img.src = CARD_IMAGES[imgKey] || CARD_IMAGES['back'];
+  fly.appendChild(img);
+
+  // Destination: center of hand rect
+  const destX = (toRect.left + toRect.width / 2) - (fromRect.left + w / 2);
+  const destY = (toRect.top  + toRect.height / 2) - (fromRect.top  + h / 2);
+
+  // Arc midpoint: halfway + slight upward curve
+  const midX = destX * 0.5;
+  const midY = destY * 0.5 - 60;
+
+  fly.style.setProperty('--fly-x', `${destX}px`);
+  fly.style.setProperty('--fly-y', `${destY}px`);
+  fly.style.setProperty('--fly-x-mid', `${midX}px`);
+  fly.style.setProperty('--fly-y-mid', `${midY}px`);
+  fly.style.animation = 'fly-to-hand 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards';
+
+  document.body.appendChild(fly);
+  setTimeout(() => {
+    fly.remove();
+    cb();
+  }, 520);
+}
+
+
+
+// ====================================================================
 //  TURN LOGIC
 // ====================================================================
 
@@ -669,6 +757,22 @@ function playerDraw() {
   if (G.deck.length === 0) { playerStay(); return; }
   const card = G.deck.pop();
 
+  // Determine where the card is flying to
+  const isHuman = p.type === 'human';
+  const toRect = getHandRect(isHuman);
+
+  // Disable buttons during animation
+  document.querySelectorAll('.btn-action').forEach(b => b.disabled = true);
+
+  // Show the card flying (face-up for human, face-down for AI — reveal after)
+  const flyKey = isHuman ? (card.imgKey || String(card.value)) : 'back';
+  animateDeal(flyKey, toRect, () => {
+    // Animation done — now process the card
+    _processDrawnCard(p, card, isHuman);
+  });
+}
+
+function _processDrawnCard(p, card, isHuman) {
   if (card.type === 'action') {
     setLog(`${p.name} drew: ${card.value}`);
     handleActionCard(card, p);
@@ -717,11 +821,14 @@ function playerDraw() {
   }
 
   renderGame();
+
+  // After drawing, always move to next player (human or AI)
   setTimeout(() => {
     if (isRoundOver()) { endRound(); return; }
-    if (p.type !== 'human') setTimeout(() => nextPlayer(), 400);
+    nextPlayer();
   }, 300);
 }
+
 
 function handleActionCard(card, actor) {
   const action = card.action;
