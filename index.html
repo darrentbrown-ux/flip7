@@ -761,8 +761,8 @@ function playerDraw() {
   const isHuman = p.type === 'human';
   const toRect = getHandRect(isHuman);
 
-  // Disable buttons during animation
-  document.querySelectorAll('.btn-action').forEach(b => b.disabled = true);
+  // Disable only the in-game action buttons during animation (not modal buttons)
+  document.querySelectorAll('#zone-human .btn-action').forEach(b => b.disabled = true);
 
   // Show the card flying (face-up for human, face-down for AI — reveal after)
   const flyKey = isHuman ? (card.imgKey || String(card.value)) : 'back';
@@ -1225,7 +1225,7 @@ function renderHuman(player) {
   const cardsRow = document.createElement('div');
   cardsRow.className = 'human-cards-row';
 
-  // Number cards
+  // Number cards (main hand)
   const numSec = document.createElement('div');
   numSec.className = 'hand-section grow';
   numSec.innerHTML = `<label>Cards (${numCards}/7)</label>`;
@@ -1233,15 +1233,6 @@ function renderHuman(player) {
   numHand.className = 'hand';
   for (const c of player.hand) numHand.appendChild(cardEl(c, 'sm'));
   numSec.appendChild(numHand);
-
-  // Bonus / special
-  const bonSec = document.createElement('div');
-  bonSec.className = 'hand-section';
-  bonSec.innerHTML = `<label>Bonus / Special</label>`;
-  const bonHand = document.createElement('div');
-  bonHand.className = 'hand';
-  for (const c of player.bonusCards) bonHand.appendChild(cardEl(c, 'sm'));
-  bonSec.appendChild(bonHand);
 
   // Deck
   const deckZone = document.createElement('div');
@@ -1258,9 +1249,22 @@ function renderHuman(player) {
   deckZone.appendChild(dcnt);
 
   cardsRow.appendChild(numSec);
-  cardsRow.appendChild(bonSec);
   cardsRow.appendChild(deckZone);
   area.appendChild(cardsRow);
+
+  // Bonus / special below the main hand
+  if (player.bonusCards.length > 0) {
+    const bonRow = document.createElement('div');
+    bonRow.className = 'hand-section';
+    bonRow.style.flexShrink = '0';
+    bonRow.innerHTML = `<label>Bonus / Special</label>`;
+    const bonHand = document.createElement('div');
+    bonHand.className = 'hand';
+    bonHand.style.justifyContent = 'center';
+    for (const c of player.bonusCards) bonHand.appendChild(cardEl(c, 'sm'));
+    bonRow.appendChild(bonHand);
+    area.appendChild(bonRow);
+  }
 
   // Score info
   const infoRow = document.createElement('div');
